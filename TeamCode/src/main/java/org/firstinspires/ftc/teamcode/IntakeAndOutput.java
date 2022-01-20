@@ -10,7 +10,11 @@ public class IntakeAndOutput {
     DcMotor intakemotor2;
     DcMotor outputmotor;
 
-    double lasttime = 0.0;
+    double lasttimex = 0.0, lasttimeb = 0.0;
+
+    int posinitial=0;
+
+    int val = 200;
 
     boolean k=false,apsatA=false;
 
@@ -31,9 +35,9 @@ public class IntakeAndOutput {
 
     void turnOnIntake(boolean x, double time)
     {
-            if(x && time-lasttime>500.0)
+            if(x && time-lasttimex>500.0)
             {
-                lasttime=time;
+                lasttimex=time;
                 if(intakemotor1.getPower()==0)
                 {
                     intakemotor1.setPower(1);
@@ -56,14 +60,16 @@ public class IntakeAndOutput {
     {
         if(k==false)
         {
-            //invarte motoru x metri in fata
+            outputmotor.setTargetPosition(val);
             k=true;
         }
         else
         {
-            //invarte motoru x metri in spate
+            outputmotor.setTargetPosition(0);
             k=false;
         }
+        outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        outputmotor.setPower(0.2);
 
     }
 
@@ -81,19 +87,33 @@ public class IntakeAndOutput {
 
     void turnOnOutput(boolean a, boolean b, double time)
     {
-        if(b && time-lasttime>500.0)
+        if(b && time-lasttimeb>500.0)
         {
-            lasttime = time;
+            lasttimeb = time;
             deplaseazaxmetri();
         }
         while(a)
         {
-            apsatA = true;
-            deplasaremotora();
+            if(posinitial!=outputmotor.getCurrentPosition())apsatA=true;
+            if(outputmotor.getCurrentPosition()==posinitial)
+            {
+                outputmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if(a)
+                {
+                    posinitial = outputmotor.getCurrentPosition();
+                }
+                while(a) {
+                    k=true;
+                    outputmotor.setPower(1);
+                }
+                outputmotor.setPower(0);
+            }
         }
         if(apsatA)
         {
-            //intoarcete inappi
+            outputmotor.setTargetPosition(posinitial);
+            outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            outputmotor.setPower(1);
             apsatA=false;
         }
     }

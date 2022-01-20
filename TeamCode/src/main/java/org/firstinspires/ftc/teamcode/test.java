@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -11,6 +12,9 @@ import com.qualcomm.robotcore.util.Range;
 public class test extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor testmotor = null;
+    int val,posinitial;
+    double xval;
+    boolean k=false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -18,7 +22,7 @@ public class test extends OpMode {
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-
+        xval = 1;
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -27,6 +31,9 @@ public class test extends OpMode {
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         testmotor.setDirection(DcMotor.Direction.FORWARD);
+
+        val =1000;
+        posinitial=0;
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -52,7 +59,31 @@ public class test extends OpMode {
      */
     @Override
     public void loop() {
-        testmotor.setPower(1);
+
+        if(posinitial!=testmotor.getCurrentPosition()){
+            k=true;
+            xval -= 0.2;
+        }
+        if(testmotor.getCurrentPosition()==posinitial)
+        {
+            testmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if(gamepad1.a)
+            {
+                posinitial = testmotor.getCurrentPosition();
+            }
+            while(gamepad1.a) {
+                k=true;
+                testmotor.setPower(1);
+            }
+            testmotor.setPower(0);
+        }
+        if(k==true)
+        {
+            testmotor.setTargetPosition(posinitial);
+            testmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            testmotor.setPower(xval);
+            k=false;
+        }
     }
 
     /*
