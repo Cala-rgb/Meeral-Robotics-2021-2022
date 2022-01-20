@@ -92,8 +92,9 @@ public class IntakeAndOutput {
             lasttimeb = time;
             deplaseazaxmetri();
         }
-        while(a)
+        if(a)
         {
+            posinitial = outputmotor.getCurrentPosition();
             if(posinitial!=outputmotor.getCurrentPosition())apsatA=true;
             if(outputmotor.getCurrentPosition()==posinitial)
             {
@@ -108,13 +109,13 @@ public class IntakeAndOutput {
                 }
                 outputmotor.setPower(0);
             }
-        }
-        if(apsatA)
-        {
-            outputmotor.setTargetPosition(posinitial);
-            outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            outputmotor.setPower(1);
-            apsatA=false;
+            if(apsatA)
+            {
+                outputmotor.setTargetPosition(posinitial);
+                outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                outputmotor.setPower(1);
+                apsatA=false;
+            }
         }
     }
 
