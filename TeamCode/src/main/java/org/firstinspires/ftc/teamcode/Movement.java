@@ -14,13 +14,21 @@ public class Movement {
         this.br=br;
     }
 
-    void move(double forwardpower, double backwardpower, double steer, double strafe, double rsthr)
+    void move(double forwardpower, double backwardpower, double steer, double strafe, double rsthr,double pow)
     {
         double throttle = forwardpower-backwardpower+rsthr;
-        fl.setPower(throttle-steer-strafe);
-        fr.setPower(throttle+steer+strafe);
-        bl.setPower(throttle-steer+strafe);
-        br.setPower(throttle+steer-strafe);
+        fl.setPower((throttle-steer-strafe)*pow);
+        fr.setPower((throttle+steer+strafe)*pow);
+        bl.setPower((throttle-steer+strafe)*pow);
+        br.setPower((throttle+steer-strafe)*pow);
+    }
+
+    void bumbersteering(double pow)
+    {
+        fl.setPower(-pow);
+        fr.setPower(pow);
+        bl.setPower(-pow);
+        br.setPower(pow);
     }
 
 }

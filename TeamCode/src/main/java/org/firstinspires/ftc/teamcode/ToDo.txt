@@ -1,0 +1,11 @@
+[  ] Triggere : fata spate
+[  ] Left stick : viraj
+[  ] Right stick : strafe + fata spate
+[  ] Dpad jos 1/2 speed
+[  ] Dpad sus full speed
+[  ] Left / Right bumper rotire cu 1/4 speed ( știu că s butoane și au doar 1 și 0 deci fie full power fie no power
+[  ] X - toggle on la intake, off daca detectezi că ai luat, vedem cum facem fie senzor fie rpm downspike, dar dacă din motive dubioase nu se oprește și toggle de off
+[  ] B - rotire motor lansare x metri ( nu știm cât îi x punel 30 cm momentan daca vrei) deci ii un toggle, iar toggle u asta o sal denumesc k că am nevoie la a, vezi imd, b e și toggle off gen rotire invers x + o toleranta y metri.
+[  ] A - daca ii k true (a fost apăsat b înainte și îi activat) a va fi springy, gen daca îl apas duce motorul de la lansare full speed în direcția din care o pornit inițial, iar când iau mana de pe el o ia înapoi până în poziția de stop de la B(după aia x metri) daca b nu a fost apăsat a pur și simplu springy cu poziția in care e când îi apăsat, când iau mana de pe el sa se duca înapoi de unde a plecat + o toleranta y din nou
+[  ] Start(ăla de lângă butonu de Xbox) - rotire 1/3 speed motor rățuște / servo nu știm încă ce ii da o sa vedem plm
+[  ] Atâta avem până.acum, restul vedem pe parcurs, aici am acoperit ce ii soto că așa vine

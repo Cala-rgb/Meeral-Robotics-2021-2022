@@ -14,24 +14,55 @@ public class V1 extends OpMode {
     private DcMotor fr = null;
     private DcMotor bl = null;
     private DcMotor br = null;
+    private DcMotor caruselmotor = null;
+    private DcMotor intakemotor1 = null;
+    private DcMotor intakemotor2 = null;
+    private DcMotor outputmotor = null;
     private Movement mv;
+    private IntakeAndOutput iao;
+    private double pow,bumpersteeringval;
 
+    double metripozb;
+
+    private  void getEngines()
+    {
+        fl  = hardwareMap.get(DcMotor.class, "fl");
+        fr = hardwareMap.get(DcMotor.class, "fr");
+        fl  = hardwareMap.get(DcMotor.class, "bl");
+        fr = hardwareMap.get(DcMotor.class, "br");
+        caruselmotor = hardwareMap.get(DcMotor.class, "caruselmotor");
+        intakemotor1 = hardwareMap.get(DcMotor.class, "intakemotor1");
+        intakemotor2 = hardwareMap.get(DcMotor.class, "intakemotor2");
+        outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
+    }
+
+    private void setDirections()
+    {
+        fl.setDirection(DcMotor.Direction.FORWARD);
+        fr.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotor.Direction.FORWARD);
+        br.setDirection(DcMotor.Direction.REVERSE);
+        caruselmotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakemotor1.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakemotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        outputmotor.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
 
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        fl  = hardwareMap.get(DcMotor.class, "fl");
-        fr = hardwareMap.get(DcMotor.class, "fr");
-        fl  = hardwareMap.get(DcMotor.class, "bl");
-        fr = hardwareMap.get(DcMotor.class, "br");
+        getEngines();
 
-        fl.setDirection(DcMotor.Direction.FORWARD);
-        fr.setDirection(DcMotor.Direction.REVERSE);
-        bl.setDirection(DcMotor.Direction.FORWARD);
-        br.setDirection(DcMotor.Direction.REVERSE);
+        setDirections();
 
         mv = new Movement(fl,fr,bl,br);
+
+        iao = new IntakeAndOutput(caruselmotor, intakemotor1, intakemotor2, outputmotor);
+
+        iao.convertmtorpm(metripozb);
+
+        bumpersteeringval = 0.25;
 
         telemetry.addData("Status", "Initialized");
     }
@@ -47,7 +78,16 @@ public class V1 extends OpMode {
 
     @Override
     public void loop() {
-        mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y);
+        if(gamepad1.dpad_down)
+            pow = 0.5;
+        if(gamepad1.dpad_up)
+            pow = 1;
+        if(gamepad1.right_bumper)
+            mv.bumbersteering(bumpersteeringval);
+        if(gamepad1.left_bumper)
+            mv.bumbersteering(-bumpersteeringval);
+        mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
+        iao.verifyAll(gamepad1.x,gamepad1.b,gamepad1.a,gamepad1.start, runtime.milliseconds());
     }
 
     @Override
