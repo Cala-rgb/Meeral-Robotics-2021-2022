@@ -11,9 +11,10 @@ import com.qualcomm.robotcore.util.Range;
 
 public class test extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor testmotor = null;
+    private DcMotor intake1 = null;
+    private DcMotor intake2 = null;
     int val,posinitial;
-    double xval;
+    double lasttimea=0.0,lasttimeb=0.0;
     boolean k=false;
 
     /*
@@ -22,18 +23,18 @@ public class test extends OpMode {
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-        xval = 1;
+
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        testmotor = hardwareMap.get(DcMotor.class, "testmotor");
+        intake1 = hardwareMap.get(DcMotor.class, "i1");
+        intake2 = hardwareMap.get(DcMotor.class, "i2");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        testmotor.setDirection(DcMotor.Direction.FORWARD);
+        intake1.setDirection(DcMotor.Direction.FORWARD);
+        intake2.setDirection(DcMotor.Direction.FORWARD);
 
-        val =1000;
-        posinitial=0;
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -59,30 +60,32 @@ public class test extends OpMode {
      */
     @Override
     public void loop() {
-
-        if(posinitial!=testmotor.getCurrentPosition()){
-            k=true;
-            xval -= 0.2;
-        }
-        if(testmotor.getCurrentPosition()==posinitial)
+        if(gamepad1.x && runtime.milliseconds()-lasttimea>500.0)
         {
-            testmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            if(gamepad1.a)
+            lasttimea=runtime.milliseconds();
+            if(intake1.getPower()==0)
             {
-                posinitial = testmotor.getCurrentPosition();
+                intake1.setPower(-0.5);
+                intake2.setPower(0.5);
             }
-            while(gamepad1.a) {
-                k=true;
-                testmotor.setPower(1);
+            else{
+                intake1.setPower(0);
+                intake2.setPower(0);
             }
-            testmotor.setPower(0);
         }
-        if(k==true)
+        if(gamepad1.b && runtime.milliseconds()-lasttimeb>500.0)
         {
-            testmotor.setTargetPosition(posinitial);
-            testmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            testmotor.setPower(xval);
-            k=false;
+            lasttimeb=runtime.milliseconds();
+            if(intake1.getPower()==0)
+            {
+                intake1.setPower(0.5);
+                intake2.setPower(-0.5);
+            }
+            else
+            {
+                intake1.setPower(0);
+                intake2.setPower(0);
+            }
         }
     }
 

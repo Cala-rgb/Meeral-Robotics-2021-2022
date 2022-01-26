@@ -16,7 +16,7 @@ public class Movement {
 
     void move(double forwardpower, double backwardpower, double steer, double strafe, double rsthr,double pow)
     {
-        double throttle = forwardpower-backwardpower+rsthr;
+        double throttle = -forwardpower+backwardpower+rsthr;
         fl.setPower((throttle-steer-strafe)*pow);
         fr.setPower((throttle+steer+strafe)*pow);
         bl.setPower((throttle-steer+strafe)*pow);

@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class IntakeAndOutput {
 
 
-    DcMotor caruselmotor;
+    //DcMotor caruselmotor;
     DcMotor intakemotor1;
     DcMotor intakemotor2;
-    DcMotor outputmotor;
+    //DcMotor outputmotor;
 
     double lasttimex = 0.0, lasttimeb = 0.0;
 
@@ -18,30 +18,28 @@ public class IntakeAndOutput {
 
     boolean k=false,apsatA=false;
 
-    public IntakeAndOutput(DcMotor caruselmotor, DcMotor intakemotor1, DcMotor intakemotor2, DcMotor outputmotor)
+    public IntakeAndOutput(DcMotor intakemotor1, DcMotor intakemotor2)
     {
-        this.caruselmotor=caruselmotor;
         this.intakemotor1=intakemotor1;
         this.intakemotor2=intakemotor2;
-        this.outputmotor=outputmotor;
     }
 
-    public void verifyAll(boolean x, boolean b, boolean a, boolean start, double time)
+    public void verifyAll(boolean x, boolean b, boolean a, boolean y, double time)
     {
-        turnOnIntake(x, time);
-        turnOnOutput(a, b, time);
-        rotireCarusel(start);
+        turnOnIntake(x, b ,time);
+        //turnOnOutput(a);
+        //rotireCarusel(y);
     }
 
-    void turnOnIntake(boolean x, double time)
+    void turnOnIntake(boolean x,boolean b ,double time)
     {
             if(x && time-lasttimex>500.0)
             {
                 lasttimex=time;
                 if(intakemotor1.getPower()==0)
                 {
-                    intakemotor1.setPower(1);
-                    intakemotor2.setPower(-1);
+                    intakemotor1.setPower(-0.5);
+                    intakemotor2.setPower(0.5);
                 }
                 else
                 {
@@ -49,49 +47,24 @@ public class IntakeAndOutput {
                     intakemotor2.setPower(0);
                 }
             }
-    }
-
-    public void convertmtorpm(double metri)
-    {
-        //convertim metri in rpm
-    }
-
-    void deplaseazaxmetri()
-    {
-        if(k==false)
-        {
-            outputmotor.setTargetPosition(val);
-            k=true;
-        }
-        else
-        {
-            outputmotor.setTargetPosition(0);
-            k=false;
-        }
-        outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        outputmotor.setPower(0.2);
-
-    }
-
-    void countrotatii()
-    {
-        //numaram rotatile
-    }
-
-    void deplasaremotora()
-    {
-        //deplasam motorul cat timp e apasat a
-        outputmotor.setPower(1);
-        countrotatii();
-    }
-
-    void turnOnOutput(boolean a, boolean b, double time)
-    {
         if(b && time-lasttimeb>500.0)
         {
-            lasttimeb = time;
-            deplaseazaxmetri();
+            lasttimeb=time;
+            if(intakemotor1.getPower()==0)
+            {
+                intakemotor1.setPower(0.5);
+                intakemotor2.setPower(-0.5);
+            }
+            else
+            {
+                intakemotor1.setPower(0);
+                intakemotor2.setPower(0);
+            }
         }
+    }
+
+    /*void turnOnOutput(boolean a)
+    {
         if(a)
         {
             posinitial = outputmotor.getCurrentPosition();
@@ -109,20 +82,20 @@ public class IntakeAndOutput {
                 }
                 outputmotor.setPower(0);
             }
-            if(apsatA)
+            if(apsatA==true)
             {
                 outputmotor.setTargetPosition(posinitial);
                 outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                outputmotor.setPower(1);
+                outputmotor.setPower(0.5);
                 apsatA=false;
             }
         }
     }
 
-    void rotireCarusel(boolean start)
+    void rotireCarusel(boolean y)
     {
-        if(start)
+        if(y)
             caruselmotor.setPower(0.33);
-    }
+    */
 
 }
