@@ -33,33 +33,17 @@ public class IntakeAndOutput {
 
     void turnOnIntake(boolean x,boolean b ,double time)
     {
-            if(x && time-lasttimex>500.0)
-            {
-                lasttimex=time;
-                if(intakemotor1.getPower()==0)
-                {
-                    intakemotor1.setPower(-0.5);
-                    intakemotor2.setPower(0.5);
-                }
-                else
-                {
-                    intakemotor1.setPower(0);
-                    intakemotor2.setPower(0);
-                }
-            }
-        if(b && time-lasttimeb>500.0)
-        {
-            lasttimeb=time;
-            if(intakemotor1.getPower()==0)
-            {
-                intakemotor1.setPower(0.5);
-                intakemotor2.setPower(-0.5);
-            }
-            else
-            {
-                intakemotor1.setPower(0);
-                intakemotor2.setPower(0);
-            }
+        if(x){
+            intakemotor1.setPower(-0.7);
+            intakemotor2.setPower(0.7);
+        }
+        else if(b) {
+            intakemotor1.setPower(0.4);
+            intakemotor2.setPower(-0.4);
+        }
+        else {
+            intakemotor1.setPower(0);
+            intakemotor2.setPower(0);
         }
     }
 

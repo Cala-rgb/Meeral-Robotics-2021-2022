@@ -29,34 +29,47 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="Autonom version 1", group="Auto demo")
-public class AutoV1 extends LinearOpMode {
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
+@Autonomous(name="Autonom version 2", group="Auto demo")
+public class AutoV2 extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL;
     private AutoMovement am;
+    private BNO055IMU imu;
+    private CRServo duckServo;
     VoltageSensor vs;
 
     private void getHardware() {
+
+        duckServo = hardwareMap.get(CRServo.class, "duckServo");
+
         frontRight = hardwareMap.get(DcMotor.class, "fr");
         frontLeft = hardwareMap.get(DcMotor.class, "fl");
         backRight = hardwareMap.get(DcMotor.class, "br");
         backLeft = hardwareMap.get(DcMotor.class, "bl");
+
         intakeR = hardwareMap.get(DcMotor.class,"intakeR");
         intakeL = hardwareMap.get(DcMotor.class, "intakeL");
         intakeR.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeL.setDirection(DcMotorSimple.Direction.FORWARD);
+
         vs = hardwareMap.voltageSensor.iterator().next();
     }
 
@@ -72,6 +85,7 @@ public class AutoV1 extends LinearOpMode {
             telemetry.addData("frontLeftTarget:", frontLeft.getTargetPosition());
             telemetry.addData("backRightTarget:", backRight.getTargetPosition());
             telemetry.addData("backLeftTarget:", backLeft.getTargetPosition());
+            telemetry.addData("ceva", imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES));
             telemetry.update();
         }
     }
@@ -119,22 +133,84 @@ public class AutoV1 extends LinearOpMode {
         telem();
         //am.resetEncoders();
     }
+    private void intakeout()
+    {
+        intakeR.setPower(-1);
+        intakeL.setPower(-1);
+        sleep(500);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
+    }
+
+    private void intakein(double power)
+    {
+        intakeR.setPower(1);
+        intakeL.setPower(1);
+        am.driveToWithGyro(0.1, AutoMovement.Directions.FORWARD, power*0.2);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
+    }
+
+    private void duck()
+    {
+        duckServo.setPower(1);
+        sleep(5000);
+        duckServo.setPower(0);
+    }
 
     @Override
     public void runOpMode() {
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled = false;
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        //telemetry = dashboard.getTelemetry();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+        imu.initialize(parameters);
+
+        telemetry.addData("Mode", "calibrating...");
+        telemetry.update();
+
+        // make sure the imu gyro is calibrated before continuing.
+        while (!isStopRequested() && !imu.isGyroCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
         getHardware();
-        //am = new AutoMovement(frontRight, frontLeft, backRight, backLeft);
+        am = new AutoMovement(this, imu, frontRight, frontLeft, backRight, backLeft);
+
+        telemetry.addData("Mode", "calibrated");
+        telemetry.update();
+
         waitForStart();
         runtime.reset();
         double voltage = vs.getVoltage();
-        iacub(11.0/voltage);
-        //voltage = vs.getVoltage();
-        //iacub(voltage);
-        am.driveTo(0.15, AutoMovement.Directions.ROTATE_LEFT, 0.8);
-        telem();
-        am.driveTo(3, AutoMovement.Directions.FORWARD, 0.8);
-        telem();
+        double power= 11.0/voltage;
+        am.driveToWithGyro(0.8, AutoMovement.Directions.FORWARD, power);
+        duck();
+        am.rotateTo(90,power*0.5);
+        am.driveToWithGyro(0.6, AutoMovement.Directions.FORWARD, power);
+        intakeout();
+        am.driveToWithGyro(0.65, AutoMovement.Directions.BACKWARD, power);
+        am.rotateTo(179,power*0.5);
+        am.driveToWithGyro(4.4, AutoMovement.Directions.FORWARD, power);
+        intakein(power);
+        am.rotateTo(0,power*0.5);
+        am.driveToWithGyro(0.25, AutoMovement.Directions.RIGHT,power * 0.4);
+        am.driveToWithGyro(4.5, AutoMovement.Directions.FORWARD,power);
+        am.rotateTo(90, power*0.5);
+        am.driveToWithGyro(0.7, AutoMovement.Directions.FORWARD, power);
+        intakeout();
+        am.driveToWithGyro(0.8, AutoMovement.Directions.BACKWARD, power);
+        am.rotateTo(179, power*0.5);
+        am.driveToWithGyro(4, AutoMovement.Directions.FORWARD, power);
+        sleep(2000);
+
     }
 }

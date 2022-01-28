@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,7 +15,8 @@ public class V1 extends OpMode {
     private DcMotor fr = null;
     private DcMotor bl = null;
     private DcMotor br = null;
-    //private DcMotor caruselmotor = null;
+    private CRServo duckServo = null;
+
     private DcMotor intakemotor1 = null;
     private DcMotor intakemotor2 = null;
     //private DcMotor outputmotor = null;
@@ -26,11 +28,13 @@ public class V1 extends OpMode {
 
     private  void getEngines()
     {
+        duckServo = hardwareMap.get(CRServo.class, "duckServo");
+
         fl  = hardwareMap.get(DcMotor.class, "fl");
         fr = hardwareMap.get(DcMotor.class, "fr");
         bl  = hardwareMap.get(DcMotor.class, "bl");
         br = hardwareMap.get(DcMotor.class, "br");
-        //caruselmotor = hardwareMap.get(DcMotor.class, "caruselmotor");
+
         intakemotor1 = hardwareMap.get(DcMotor.class, "intakeR");
         intakemotor2 = hardwareMap.get(DcMotor.class, "intakeL");
         //outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
@@ -94,6 +98,11 @@ public class V1 extends OpMode {
             mv.bumbersteering(-bumpersteeringval);
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
         iao.verifyAll(gamepad1.x,gamepad1.b,gamepad1.a,gamepad1.y, runtime.milliseconds());
+
+        if (gamepad1.y)
+            duckServo.setPower(1);
+        else
+            duckServo.setPower(0);
     }
 
     @Override
