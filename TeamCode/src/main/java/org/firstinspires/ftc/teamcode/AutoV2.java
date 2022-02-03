@@ -36,41 +36,61 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name="Autonom version 2", group="Auto demo")
+@Autonomous(name="Autonom version 2", group="Autonom bomba")
 public class AutoV2 extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL;
+    private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL, outputmotor;
     private AutoMovement am;
     private BNO055IMU imu;
-    private CRServo duckServo;
+    private CRServo duckServo, liftServoR, liftServoL;
+    private Servo preloadedServo, totemServo;
+    private OpenCvWebcam webcam;
+    private ColorRangeSensor color;
+    private TeamElementPipeline pipeline;
+    private TeamElementPipeline.TeamElementPosition snapshotAnalysis = TeamElementPipeline.TeamElementPosition.LEFT;
+    private ServoController sc;
     VoltageSensor vs;
 
     private void getHardware() {
 
         duckServo = hardwareMap.get(CRServo.class, "duckServo");
+        liftServoL = hardwareMap.get(CRServo.class, "lift2");
+        liftServoR = hardwareMap.get(CRServo.class, "lift1");
+        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
+        frontLeft  = hardwareMap.get(DcMotor.class, "fl");
         frontRight = hardwareMap.get(DcMotor.class, "fr");
-        frontLeft = hardwareMap.get(DcMotor.class, "fl");
+        backLeft  = hardwareMap.get(DcMotor.class, "bl");
         backRight = hardwareMap.get(DcMotor.class, "br");
-        backLeft = hardwareMap.get(DcMotor.class, "bl");
 
-        intakeR = hardwareMap.get(DcMotor.class,"intakeR");
+        intakeR = hardwareMap.get(DcMotor.class, "intakeR");
         intakeL = hardwareMap.get(DcMotor.class, "intakeL");
-        intakeR.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeL.setDirection(DcMotorSimple.Direction.FORWARD);
+        outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
+        color = hardwareMap.get(ColorRangeSensor.class, "color");
 
         vs = hardwareMap.voltageSensor.iterator().next();
+        duckServo.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     private void telem()
@@ -90,49 +110,6 @@ public class AutoV2 extends LinearOpMode {
         }
     }
 
-
-    void iacub(double pow)
-    {
-
-        am.driveTo(3.2, AutoMovement.Directions.FORWARD, pow);
-        telem();
-        //am.resetEncoders();
-        intakeR.setPower(0.5);
-        intakeL.setPower(0.5);
-        sleep(200);
-        am.driveTo(0.25, AutoMovement.Directions.FORWARD, 0.2*pow);
-        telem();
-        //am.resetEncoders();
-        intakeR.setPower(0);
-        intakeL.setPower(0);
-        sleep(500);
-        am.driveTo(0.05, AutoMovement.Directions.ROTATE_LEFT, 0.2*pow);
-        telem();
-        am.driveTo(4.5, AutoMovement.Directions.BACKWARD, 0.5*pow);
-        telem();
-        //am.resetEncoders();
-        am.driveTo(0.75, AutoMovement.Directions.ROTATE_RIGHT, 0.8*pow);
-        telem();
-        //am.resetEncoders();
-        am.driveTo(0.6, AutoMovement.Directions.FORWARD, 0.8*pow);
-        telem();
-        //am.resetEncoders();
-        intakeR.setPower(-0.5);
-        intakeL.setPower(-0.5);
-        sleep(1000);
-        intakeR.setPower(0);
-        intakeL.setPower(0);
-        sleep(200);
-        am.driveTo(0.75, AutoMovement.Directions.BACKWARD, 0.8*pow);
-        telem();
-        //am.resetEncoders();
-        am.driveTo(0.85, AutoMovement.Directions.ROTATE_LEFT, 0.8*pow);
-        telem();
-        //am.resetEncoders();
-        am.driveTo(1.3, AutoMovement.Directions.FORWARD, 0.8*pow);
-        telem();
-        //am.resetEncoders();
-    }
     private void intakeout()
     {
         intakeR.setPower(-1);
@@ -147,19 +124,46 @@ public class AutoV2 extends LinearOpMode {
         intakeR.setPower(1);
         intakeL.setPower(1);
         am.driveToWithGyro(0.1, AutoMovement.Directions.FORWARD, power*0.2);
+        if(color.getDistance(DistanceUnit.CM) < 10.0)
+        {
+            intakeR.setPower(0);
+            intakeL.setPower(0);
+        }
         intakeR.setPower(0);
         intakeL.setPower(0);
     }
 
     private void duck()
     {
-        duckServo.setPower(1);
-        sleep(5000);
+        double accGain = 0.02, p = 0.0;
+        while (p <= 0.98) {
+            p += accGain;
+            duckServo.setPower(p);
+        }
+        sleep(3000);
         duckServo.setPower(0);
     }
 
     @Override
     public void runOpMode() {
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        pipeline = new TeamElementPipeline();
+        webcam.setPipeline(pipeline);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(640,480, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {}
+        });
+
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -177,40 +181,63 @@ public class AutoV2 extends LinearOpMode {
         telemetry.update();
 
         // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated())
+        while ((!isStarted() && !isStopRequested()) || !imu.isGyroCalibrated())
         {
+            snapshotAnalysis = pipeline.getAnalysis();
+            telemetry.addData("Realtime analysis", pipeline.getAnalysis());
+            telemetry.update();
             sleep(50);
             idle();
         }
+
+        double upTime = 0;
+
+        if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
+            upTime = 0;
+        }
+        else if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.CENTER){
+            upTime = 0.75;
+        }
+        else {
+            upTime = 1.25;
+        }
+
         getHardware();
+        sc = new ServoController(liftServoR, liftServoL, outputmotor);
         am = new AutoMovement(this, imu, frontRight, frontLeft, backRight, backLeft);
 
         telemetry.addData("Mode", "calibrated");
         telemetry.update();
 
-        waitForStart();
         runtime.reset();
         double voltage = vs.getVoltage();
-        double power= 11.0/voltage;
-        am.driveToWithGyro(0.8, AutoMovement.Directions.FORWARD, power);
-        duck();
-        am.rotateTo(90,power*0.5);
-        am.driveToWithGyro(0.6, AutoMovement.Directions.FORWARD, power);
-        intakeout();
-        am.driveToWithGyro(0.65, AutoMovement.Directions.BACKWARD, power);
-        am.rotateTo(179,power*0.5);
-        am.driveToWithGyro(4.4, AutoMovement.Directions.FORWARD, power);
-        intakein(power);
-        am.rotateTo(0,power*0.5);
-        am.driveToWithGyro(0.25, AutoMovement.Directions.RIGHT,power * 0.4);
-        am.driveToWithGyro(4.5, AutoMovement.Directions.FORWARD,power);
-        am.rotateTo(90, power*0.5);
-        am.driveToWithGyro(0.7, AutoMovement.Directions.FORWARD, power);
-        intakeout();
-        am.driveToWithGyro(0.8, AutoMovement.Directions.BACKWARD, power);
-        am.rotateTo(179, power*0.5);
-        am.driveToWithGyro(4, AutoMovement.Directions.FORWARD, power);
-        sleep(2000);
+        double power= 11/voltage;
 
+        preloadedServo.setPosition(0.8);
+
+        am.strafeWithGyro(0.3, AutoMovement.Directions.RIGHT, power);
+        am.driveToWithGyro(1.05, AutoMovement.Directions.FORWARD, power, upTime, sc, true);
+        duck();
+        am.strafeWithGyro(0.7, AutoMovement.Directions.RIGHT, power);
+        am.driveToWithGyro(2.1, AutoMovement.Directions.BACKWARD, power);
+        am.rotateTo(90, power * 0.6);
+        sleep(1000);
+        am.driveToWithGyro(0.2, AutoMovement.Directions.BACKWARD, power);
+        preloadedServo.setPosition(0);
+        sleep(1000);
+        am.rotateTo(180, power*0.8);
+        am.strafeWithGyro(1.5, AutoMovement.Directions.RIGHT, power);
+        /*
+        am.driveToWithGyro(2.5, AutoMovement.Directions.FORWARD, power);
+        intakein(power);
+        am.driveToWithGyro(2.7, AutoMovement.Directions.BACKWARD, power, 2000, sc, false);
+        am.rotateTo(90, power*0.8);
+        am.driveToWithGyro(1.5, AutoMovement.Directions.FORWARD, power);
+        outputmotor.setPower(1);
+        sleep(500);
+        outputmotor.setPower(0);
+        am.rotateTo(180, power*0.8);
+        am.strafeWithGyro(1.5, AutoMovement.Directions.RIGHT, power);
+        am.driveToWithGyro(2, AutoMovement.Directions.FORWARD, power);*/
     }
 }

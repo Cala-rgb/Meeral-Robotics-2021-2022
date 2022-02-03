@@ -15,7 +15,7 @@ public class AutoMovement {
     private BNO055IMU imu;
     private LinearOpMode lom;
     int valpatrat=1000;
-    double minPower = 0.15;
+    double minPower = 0.2;
     //trebuie gasita valoarea unui patrat
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
     public AutoMovement (LinearOpMode lom, BNO055IMU imu, DcMotor frontRight, DcMotor frontLeft, DcMotor backRight, DcMotor backLeft) {
@@ -149,6 +149,56 @@ public class AutoMovement {
         backRight.setPower(0);
         backLeft.setPower(0);
     }
+    public void driveToWithGyro(double patrate, Directions direction, double pow, double time, ServoController sc, boolean ok) {
+        double targetAngle = getAngle();
+        double startTime = lom.getRuntime();
+        resetEncoders();
+        setDirection(direction);
+        double  val=patrate * valpatrat;
+        int intval=(int) val;
+        frontRight.setTargetPosition(intval);
+        frontLeft.setTargetPosition(intval);
+        backRight.setTargetPosition(intval);
+        backLeft.setTargetPosition(intval);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        double gain = .01, accelerateGain = 0.02, myPow = minPower, brakeGain = 0.05;
+        frontRight.setPower(myPow);
+        frontLeft.setPower(myPow);
+        backRight.setPower(myPow);
+        backLeft.setPower(myPow);
+        sc.setPowerToServos(-1, ok);
+        while (frontRight.isBusy()) {
+            if (lom.getRuntime() - startTime >= time) {
+                sc.setPowerToServos(0, ok);
+            }
+            if (myPow < pow) {
+                myPow += accelerateGain;
+            }
+            if (myPow > minPower && frontRight.getTargetPosition() - frontRight.getCurrentPosition() < 500) {
+                myPow -= brakeGain;
+            }
+            double deviation = targetAngle - getAngle();
+            lom.telemetry.addData("Deviation", deviation);
+            lom.telemetry.addData("Time", lom.getRuntime());
+            lom.telemetry.addData("Starttime", startTime);
+            lom.telemetry.update();
+            frontRight.setPower(myPow + gain * deviation);
+            frontLeft.setPower(myPow - gain * deviation);
+            backRight.setPower(myPow + gain * deviation);
+            backLeft.setPower(myPow - gain * deviation);
+        }
+        frontRight.setPower(0);
+        frontLeft.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
 
     public void strafeWithGyro(double patrate, Directions direction, double pow) {
         double targetAngle = getAngle();
@@ -199,7 +249,7 @@ public class AutoMovement {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        double accelerateGain = 0.02, myPow = minPower, brakeGain = 0.06, angleofAction = 20;
+        double accelerateGain = 0.02, myPow = minPower, brakeGain = 0.15, angleofAction = 50 * pow;
         frontRight.setPower(myPow);
         frontLeft.setPower(myPow);
         backRight.setPower(myPow);

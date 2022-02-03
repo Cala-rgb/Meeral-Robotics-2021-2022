@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,15 +13,74 @@ import com.qualcomm.robotcore.util.Range;
 
 public class test extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor intake1 = null;
-    private DcMotor intake2 = null;
-    int val,posinitial;
-    double lasttimea=0.0,lasttimeb=0.0;
-    boolean k=false;
+    private DcMotor outputmotor = null, intakemotor1 = null, intakemotor2 = null;
+    ColorSensor color;
+    int val=-2000,posinitial;
+    double lastTimeY=0.0;
+    boolean apsatA = false,luat = false, k = false, apasatB = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
+
+    void turnOnOutput(boolean a)
+    {
+        if(a)
+        {
+            outputmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            outputmotor.setPower(0.5);
+        }
+        outputmotor.setPower(0);
+    }
+    void luatObiect()
+    {
+        if(color.red()>100.0 && (color.red()>100.0 && color.green() > 100.0 && color.blue() > 100.0))
+            luat =true;
+    }
+
+    void goToPos(boolean y, double time)
+    {
+        if(k==true && outputmotor.getCurrentPosition()!=outputmotor.getTargetPosition()){
+            apasatB = false;
+            int pos = outputmotor.getTargetPosition();
+            outputmotor.setTargetPosition(pos);
+            outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            outputmotor.setPower(-1);
+        }
+        if(k==true && outputmotor.getCurrentPosition()==outputmotor.getTargetPosition())
+        {
+            outputmotor.setPower(0);
+            luat = false;
+            apasatB = true;
+            k=false;
+            telemetry.addData("ok", "ok");
+            telemetry.update();
+        }
+        telemetry.addData("apasatB", apasatB);
+        telemetry.addData("apasatB", outputmotor.getCurrentPosition());
+        telemetry.update();
+        if(luat && time-lastTimeY>500.0)
+        {
+            lastTimeY = time;
+            if(!k && !apasatB)
+            {
+                k=true;
+                apasatB=true;
+                outputmotor.setTargetPosition(val);
+                outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                outputmotor.setPower(-1);
+            }
+            else if(apasatB)
+            {
+                outputmotor.setTargetPosition(0);
+                outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                outputmotor.setPower(-1);
+                k = true;
+                apasatB=false;
+            }
+        }
+    }
+
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -27,14 +88,20 @@ public class test extends OpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        intake1 = hardwareMap.get(DcMotor.class, "i1");
-        intake2 = hardwareMap.get(DcMotor.class, "i2");
+
+       // outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
+        intakemotor1 = hardwareMap.get(DcMotor.class, "intakemotor1");
+        intakemotor2 = hardwareMap.get(DcMotor.class, "intakemotor2");
+        outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
+        color = hardwareMap.get(ColorSensor.class, "color");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        intake1.setDirection(DcMotor.Direction.FORWARD);
-        intake2.setDirection(DcMotor.Direction.FORWARD);
 
+        //outputmotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakemotor1.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakemotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        outputmotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -60,32 +127,23 @@ public class test extends OpMode {
      */
     @Override
     public void loop() {
-        if(gamepad1.x && runtime.milliseconds()-lasttimea>500.0)
-        {
-            lasttimea=runtime.milliseconds();
-            if(intake1.getPower()==0)
-            {
-                intake1.setPower(-0.5);
-                intake2.setPower(0.5);
-            }
-            else{
-                intake1.setPower(0);
-                intake2.setPower(0);
-            }
-        }
-        if(gamepad1.b && runtime.milliseconds()-lasttimeb>500.0)
-        {
-            lasttimeb=runtime.milliseconds();
-            if(intake1.getPower()==0)
-            {
-                intake1.setPower(0.5);
-                intake2.setPower(-0.5);
-            }
-            else
-            {
-                intake1.setPower(0);
-                intake2.setPower(0);
-            }
+        //turnOnOutput(gamepad1.a);
+        telemetry.addData("red", color.red());
+        telemetry.addData("green", color.green());
+        telemetry.addData("blue", color.blue());
+        telemetry.update();
+        luatObiect();
+        goToPos(gamepad1.y, runtime.milliseconds());
+        if (gamepad1.a) {
+            intakemotor1.setPower(-0.821);
+            intakemotor2.setPower(0.821);
+        } else if (gamepad1.b){
+            intakemotor1.setPower(0.821);
+            intakemotor2.setPower(-0.821);
+        } else {
+            intakemotor1.setPower(0);
+            intakemotor2.setPower(0);
+
         }
     }
 

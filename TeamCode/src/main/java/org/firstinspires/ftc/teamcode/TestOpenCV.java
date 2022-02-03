@@ -30,31 +30,34 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-/*
- * This sample demonstrates how to run analysis during INIT
- * and then snapshot that value for later use when the START
- * command is issued. The pipeline is re-used from SkystoneDeterminationExample
- */
 @TeleOp
 public class TestOpenCV extends LinearOpMode
 {
     OpenCvWebcam webcam;
-    SkystoneDeterminationExample.SkystoneDeterminationPipeline pipeline;
-    SkystoneDeterminationExample.SkystoneDeterminationPipeline.SkystonePosition snapshotAnalysis = SkystoneDeterminationExample.SkystoneDeterminationPipeline.SkystonePosition.LEFT; // default
+    TeamElementPipeline pipeline;
+    TeamElementPipeline.TeamElementPosition snapshotAnalysis = TeamElementPipeline.TeamElementPosition.LEFT; // default
+
+    private void caseleft()
+{
+    //caz stanga
+}
+
+    private void caseright()
+    {
+        //caz dreapta
+    }
+
+    private void casecenter()
+    {
+        //caz centru
+    }
 
     @Override
     public void runOpMode()
     {
-        /**
-         * NOTE: Many comments have been omitted from this sample for the
-         * sake of conciseness. If you're just starting out with EasyOpenCv,
-         * you should take a look at {@link InternalCamera1Example} or its
-         * webcam counterpart, {@link WebcamExample} first.
-         */
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new SkystoneDeterminationExample.SkystoneDeterminationPipeline();
+        pipeline = new TeamElementPipeline();
         webcam.setPipeline(pipeline);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -62,36 +65,22 @@ public class TestOpenCV extends LinearOpMode
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640,480, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
             public void onError(int errorCode) {}
         });
 
-        /*
-         * The INIT-loop:
-         * This REPLACES waitForStart!
-         */
         while (!isStarted() && !isStopRequested())
         {
             telemetry.addData("Realtime analysis", pipeline.getAnalysis());
             telemetry.update();
-
-            // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
         }
 
-        /*
-         * The START command just came in: snapshot the current analysis now
-         * for later use. We must do this because the analysis will continue
-         * to change as the camera view changes once the robot starts moving!
-         */
         snapshotAnalysis = pipeline.getAnalysis();
 
-        /*
-         * Show that snapshot on the telemetry
-         */
         telemetry.addData("Snapshot post-START analysis", snapshotAnalysis);
         telemetry.update();
 
@@ -99,24 +88,23 @@ public class TestOpenCV extends LinearOpMode
         {
             case LEFT:
             {
-                /* Your autonomous code */
+                caseleft();
                 break;
             }
 
             case RIGHT:
             {
-                /* Your autonomous code */
+                caseright();
                 break;
             }
 
             case CENTER:
             {
-                /* Your autonomous code*/
+                casecenter();
                 break;
             }
         }
 
-        /* You wouldn't have this in your autonomous, this is just to prevent the sample from ending */
         while (opModeIsActive())
         {
             // Don't burn CPU cycles busy-looping in this sample
