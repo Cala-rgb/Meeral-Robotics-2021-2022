@@ -1,3 +1,4 @@
-[] Output
-[] servo totem
-[] servouri lift
+-vedem ce nu merge la intake
+-facem rutele sa mearga reliable
+-aia cu totem servo
+-daca mai e timp ne antrenam

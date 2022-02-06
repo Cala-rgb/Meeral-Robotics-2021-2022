@@ -24,11 +24,9 @@ public class IntakeAndOutput {
 
     ColorRangeSensor color;
 
-    int posinitial=0, targetPos = 0;
-    int merge = 0;
-    int val = 1200;
+    int posinitial=0;
     double duckSpeed= -0.2;
-    boolean apsatA = false,luat = false, k = false, apasatB = false;
+    boolean luat = false;
     double lastTimeLuat=-2000.0;
     OpMode opm;
 
@@ -46,15 +44,14 @@ public class IntakeAndOutput {
         posinitial = outputmotor.getCurrentPosition();
     }
 
-    public void verifyAll(boolean x, boolean b, boolean up, boolean down, boolean right, boolean left, boolean start, boolean a2, boolean b2, double time)
+    public void verifyAll(double rt, double lt, boolean up, boolean down, boolean right, boolean left, boolean start, double joy2, double time)
     {
-        turnOnIntake(x, b, time);
+        turnOnIntake(rt, lt, time);
         lift(right, left);
         totem(up, down);
         luatobiect(time, opm);
         ratusca(start);
-        //goToPos(time);
-        treatOutput(a2, b2);
+        treatOutput(joy2);
     }
 
     void lift(boolean right, boolean left)
@@ -92,15 +89,15 @@ public class IntakeAndOutput {
         }
     }
 
-    void turnOnIntake(boolean x,boolean b, double time)
+    void turnOnIntake(double rt, double lt, double time)
     {
-        if(b && !luat){
-            intakemotor1.setPower(-0.9);
-            intakemotor2.setPower(0.9);
+        if(rt != 0 && !luat){
+            intakemotor1.setPower(-0.9 * rt);
+            intakemotor2.setPower(0.9 * rt);
         }
-        else if(x || time - lastTimeLuat <= 1000) {
-            intakemotor1.setPower(0.4);
-            intakemotor2.setPower(-0.4);
+        else if(lt != 0 || time - lastTimeLuat <= 1000) {
+            intakemotor1.setPower(0.4 * lt);
+            intakemotor2.setPower(-0.4 * lt);
         }
         else {
             intakemotor1.setPower(0);
@@ -124,15 +121,8 @@ public class IntakeAndOutput {
         }
     }
 
-    void treatOutput(boolean a2, boolean b2) {
-        if(a2) {
-            outputmotor.setPower(0.7);
-        }
-        else if(b2){
-            outputmotor.setPower(-0.7);
-        }
-        else
-            outputmotor.setPower(0);
+    void treatOutput(double joy2) {
+        outputmotor.setPower(joy2 * -0.8);
     }
 
     void ratusca(boolean start) {
@@ -149,36 +139,4 @@ public class IntakeAndOutput {
         }
     }
 
-//    void goToPos( double time) {
-//        if (k == true && outputmotor.getCurrentPosition() != outputmotor.getTargetPosition()) {
-//            apasatB = false;
-//            int pos = outputmotor.getTargetPosition();
-//            outputmotor.setTargetPosition(pos);
-//            outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            outputmotor.setPower(-1);
-//        }
-//        if (k == true && outputmotor.getCurrentPosition() == outputmotor.getTargetPosition()) {
-//            outputmotor.setPower(0);
-//            luat = false;
-//            apasatB = true;
-//            k = false;
-//
-//        }
-//        if (luat && time - lastTimeY > 500.0) {
-//            lastTimeY = time;
-//            if (!k && !apasatB) {
-//                k = true;
-//                apasatB = true;
-//                outputmotor.setTargetPosition(val);
-//                outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                outputmotor.setPower(-1);
-//            } else if (apasatB) {
-//                outputmotor.setTargetPosition(0);
-//                outputmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                outputmotor.setPower(-1);
-//                k = true;
-//                apasatB = false;
-//            }
-//        }
-//    }
 }

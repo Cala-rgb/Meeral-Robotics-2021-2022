@@ -34,8 +34,6 @@ public class V1 extends OpMode {
     private double pow,bumpersteeringval,duckSpeed= -0.2;
     private ColorRangeSensor color= null;
 
-    double metripozb;
-
     private  void getEngines()
     {
         duckServo = hardwareMap.get(CRServo.class, "duckServo");
@@ -115,7 +113,7 @@ public class V1 extends OpMode {
         if(gamepad1.left_bumper)
             mv.bumbersteering(-bumpersteeringval);
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
-        iao.verifyAll(gamepad1.x, gamepad1.b, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.a, gamepad2.b, runtime.milliseconds());
+        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
     }
 
     @Override

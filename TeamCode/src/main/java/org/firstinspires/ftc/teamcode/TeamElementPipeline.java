@@ -23,11 +23,11 @@ public class TeamElementPipeline extends OpenCvPipeline {
     static final Scalar BLUE = new Scalar(0, 0, 255);
     static final Scalar GREEN = new Scalar(0, 255, 0);
 
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(50,190);
-    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(250,190);
-    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(450,190);
-    static final int REGION_WIDTH = 25;
-    static final int REGION_HEIGHT = 25;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(70,260);
+    static final Point REGION2_TOPLEFT_ANCHOR_POINT = new Point(270,260);
+    static final Point REGION3_TOPLEFT_ANCHOR_POINT = new Point(475,260);
+    static final int REGION_WIDTH = 40;
+    static final int REGION_HEIGHT = 40;
 
     private final ArrayDeque<Integer> lastMin1 = new ArrayDeque<>(), lastMin2 = new ArrayDeque<>(), lastMin3 = new ArrayDeque<>();
 
