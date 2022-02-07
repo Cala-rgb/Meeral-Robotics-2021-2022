@@ -33,6 +33,8 @@ public class TeleOPsolo extends OpMode {
     private IntakeAndOutput iao;
     private double pow,bumpersteeringval,duckSpeed= -0.2;
     private ColorRangeSensor color= null;
+    private double leftbump = 0;
+    private double rightbump = 0;
 
     private  void getEngines()
     {
@@ -108,12 +110,20 @@ public class TeleOPsolo extends OpMode {
             pow = .25;
         else
             pow=0.5;
-        //if(gamepad1.right_bumper)
-        //    mv.bumbersteering(bumpersteeringval);
-        //if(gamepad1.left_bumper)
-        //    mv.bumbersteering(-bumpersteeringval);
+        if(gamepad1.right_bumper) {
+            rightbump = 1;
+            leftbump = 0;
+        }
+        else if(gamepad1.left_bumper) {
+            rightbump = 0;
+            leftbump = 1;
+        }
+        else {
+            rightbump = 0;
+            leftbump = 0;
+        }
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
-        iao.verifyAll(gamepad1.right_bumper, gamepad1.left_bumper, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+        iao.verifyAll(rightbump,leftbump, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
     }
 
     @Override
