@@ -346,13 +346,13 @@ public class AutoMovement {
         setDirection(direction);
         setTargetVal();
         double gain = .05, myPow, timeLuat = 0.0;
-        intakeR.setPower(-0.9 * power);
-        intakeL.setPower(0.9 * power);
+        intakeR.setPower(-0.85 * power);
+        intakeL.setPower(0.85 * power);
         while (frontRight.getCurrentPosition() < encoderTarget) {
             if(color.getDistance(DistanceUnit.CM) < 10.0)
             {
-                intakeR.setPower(0.4 * power);
-                intakeL.setPower(-0.4 * power);
+                intakeR.setPower(0.7 * power);
+                intakeL.setPower(-0.7 * power);
             }
             myPow = getCurrentPower(frontRight.getCurrentPosition(), encoderStopAccelerate, encoderStartBrake, encoderTarget, maxPower);
             double deviation = targetAngle - getAngle();
