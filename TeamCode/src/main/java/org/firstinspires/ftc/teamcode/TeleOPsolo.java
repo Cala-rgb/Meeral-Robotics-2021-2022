@@ -35,6 +35,7 @@ public class TeleOPsolo extends OpMode {
     private ColorRangeSensor color= null;
     private double leftbump = 0;
     private double rightbump = 0;
+    private double carut = 0;
 
     private  void getEngines()
     {
@@ -122,8 +123,17 @@ public class TeleOPsolo extends OpMode {
             rightbump = 0;
             leftbump = 0;
         }
+        if(gamepad1.b){
+            carut = -1;
+        }
+        else if(gamepad1.x){
+            carut = 1;
+        }
+        else {
+            carut = 0;
+        }
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
-        iao.verifyAll(rightbump,leftbump, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+        iao.verifyAll(rightbump,leftbump, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, carut, runtime.milliseconds());
     }
 
     @Override
