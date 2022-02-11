@@ -194,7 +194,7 @@ public class AutoV2 extends LinearOpMode {
         am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.65), 300, 510, power);
         preloadedServo.setPosition(0);
         sleep(300);*/
-        am.driveBToWithGyro(AutoMovement.Directions.FORWARD, (int) (saizecicm ), 300, 700, power);
+        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm ), 300, 700, power,intakeL, intakeR, color, power);
         am.turnB(55, AutoMovement.Directions.BACKWARD, (int) (saizecicm * 0.5), 300, 400, power);
         preloadedServo.setPosition(0);
         sleep(300);

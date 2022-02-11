@@ -149,9 +149,9 @@ public class AutoMovement2 {
         setDirection(direction);
         setMotorModes();
 
-        double gain = .015, myPow, deviation;
+        double gain = -0.015, myPow, deviation;
         if (direction == Directions.BACKWARD) {
-            gain = -0.15;
+            gain = 0.015;
         }
 
         af2.prepareForQueries(maxPower);
@@ -180,9 +180,9 @@ public class AutoMovement2 {
         setDirection(direction);
         setMotorModes();
 
-        double gain = .015, myPow, deviation;
+        double gain = -0.007, myPow, deviation;
         if (direction == Directions.BACKWARD) {
-            gain = -0.15;
+            gain = 0.007;
         }
 
         af2.prepareForQueries(maxPower);

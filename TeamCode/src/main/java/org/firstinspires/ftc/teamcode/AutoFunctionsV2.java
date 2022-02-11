@@ -22,7 +22,7 @@ public class AutoFunctionsV2 {
 
     private double initialTime = 0.0;
 
-    public AutoFunctionsV2(DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, ColorRangeSensor color, CRServo duckServo, CRServo liftServoR, CRServo liftServoL)
+    public AutoFunctionsV2(DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, ColorRangeSensor color, CRServo duckServo, CRServo liftServoR, CRServo liftServoL, LinearOpMode lom)
     {
         this.intakeR = intakeR;
         this.intakeL = intakeL;
@@ -31,18 +31,19 @@ public class AutoFunctionsV2 {
         this.outputmotor = outputmotor;
         this.liftServoR = liftServoR;
         this.liftServoL = liftServoL;
+        this.linearOpMode = lom;
     }
 
     public void prepareForQueries(double power) {
         initialTime = linearOpMode.getRuntime();
         if (elevatorEnabled) {
             if (elevatorForward) {
-                liftServoR.setPower(power);
-                liftServoL.setPower(-power);
-            }
-            else {
                 liftServoR.setPower(-power);
                 liftServoL.setPower(power);
+            }
+            else {
+                liftServoR.setPower(power);
+                liftServoL.setPower(-power);
             }
         }
         if (outputmotorEnabled) {
@@ -60,8 +61,8 @@ public class AutoFunctionsV2 {
                 intakeL.setPower(-0.7 * power);
             }
             else {
-                intakeR.setPower(-power);
-                intakeL.setPower(power);
+                intakeR.setPower(-1);
+                intakeL.setPower(1);
             }
         }
     }
@@ -77,8 +78,8 @@ public class AutoFunctionsV2 {
         if (intakeEnabled) {
             if(color.getDistance(DistanceUnit.CM) < 10.0)
             {
-                intakeR.setPower(0.7 * power);
-                intakeL.setPower(-0.7 * power);
+                intakeR.setPower(0.7);
+                intakeL.setPower(-0.7);
             }
         }
     }

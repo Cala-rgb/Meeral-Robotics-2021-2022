@@ -98,6 +98,13 @@ public class AutoV3_6 extends LinearOpMode {
         //?
     }
 
+    private double getPower()
+    {
+        double voltage = vs.getVoltage();
+        double power = 12.0 / voltage;
+        return power;
+    }
+
     @Override
     public void runOpMode() {
 
@@ -144,37 +151,34 @@ public class AutoV3_6 extends LinearOpMode {
             idle();
         }
 
+        getHardware();
+        sc = new ServoController(liftServoR, liftServoL, outputmotor);
+        am2 = new AutoMovement2(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
+        af2 = new AutoFunctionsV2(intakeR, intakeL, outputmotor, color, duckServo, liftServoR, liftServoL, this);
+
         if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
             af2.setElevator(true, 0, true);
         }
         else if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.CENTER){
-            af2.setElevator(true, 0.75, true);
+            af2.setElevator(true, 1, true);
         }
         else {
             af2.setElevator(true, 3, true);
         }
-
-        getHardware();
-        sc = new ServoController(liftServoR, liftServoL, outputmotor);
-        am2 = new AutoMovement2(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
-        af2 = new AutoFunctionsV2(intakeR, intakeL, outputmotor, color, duckServo, liftServoR, liftServoL);
 
         telemetry.addData("Mode", "calibrated");
         telemetry.update();
 
         runtime.reset();
 
-        double voltage = vs.getVoltage();
-        double power = 11.0 / voltage;
-
         //Setam servourile la pozitilor lor
 
-        preloadedServo.setPosition(0.8);
+        preloadedServo.setPosition(1);
         totemServo.setPosition(0);
 
         //Mergem in fata la shipping hub
 
-        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm * 1.9), 300, 1600, power * 0.5, af2);
+        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -70, (int) (saizecicm * 1.5), 300, 1200, getPower() * 0.5, af2);
 
         sleep(200);
 
@@ -182,81 +186,129 @@ public class AutoV3_6 extends LinearOpMode {
 
         preloadedServo.setPosition(0);
         sleep(500);
-        preloadedServo.setPosition(0.8);
+        preloadedServo.setPosition(1);
+        liftServoR.setPower(0);
+        liftServoL.setPower(0);
 
         sleep(100);
 
         //Dam inapoi
 
-        af2.setElevator(true, 2, false);
-
-        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.95), 300, 650, power, af2);
-
         af2.setElevator(false, 0, true);
 
-        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 2.2), 300, 1900, power, af2);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 1.05), 300, 750, getPower(), af2);
         sleep(100);
+
+        af2.setElevator(true, 2, false);
+
+        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 1.7), 300, 1400, getPower(), af2);
+        sleep(100);
+
+        af2.setElevator(false, 0, true);
 
         //Luam cub
 
         af2.setIntake(true);
-        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power * 0.35, af2);
-        sleep(500);
-        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power, af2);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm*0.4), 100, 500, getPower() * 0.35, af2);
+        sleep(100);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, getPower(), af2);
         sleep(100);
         af2.setIntake(false);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
 
         //Punem cubul sus
 
+        af2.setOutputmotor(true, 1, true);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.8), 500, 400, getPower(), af2);
         af2.setOutputmotor(true, 0.75, true);
-        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, af2);
-        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -65, (int) (saizecicm*1.92), 300, 1600, power, af2);
+        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -67, (int) (saizecicm*1.6), 300, 1300, getPower(), af2);
+        sleep(200);
 
         outputmotor.setPower(-1);
-        sleep(1000);
+        sleep(750);
         outputmotor.setPower(0);
 
-        af2.setOutputmotor(true, 1, false);
+        af2.setOutputmotor(true, 1.25, false);
 
-        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.95), 300, 650, power, af2);
-        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 2.3), 300, 2000, power, af2);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.75), 300, 450, getPower(), af2);
+        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 1.9), 300, 1500, getPower(), af2);
 
         af2.setOutputmotor(false, 0, false);
+        sleep(200);
         //cub1
-        /*am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
-        sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        af2.setIntake(true);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm*0.5), 100, 500, getPower() * 0.35, af2);
         sleep(100);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
-        am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, getPower(), af2);
+        sleep(100);
+        af2.setIntake(false);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
+        af2.setOutputmotor(true, 1, true);
+        //am2.strafeWithGyro(0.2, AutoMovement2.Directions.RIGHT, 1);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*1.2), 300, 800, getPower(), af2);
+        af2.setOutputmotor(true, 0.75, true);
+        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -67, (int) (saizecicm*1.6), 300, 1300, getPower(), af2);
+        sleep(200);
+
         outputmotor.setPower(-1);
-        sleep(1000);
+        sleep(750);
         outputmotor.setPower(0);
-        am.driveToWithGyro(AutoMovement.Directions.FORWARD, (int) (saizecicm * 0.95), 300, 650, power, 1, sc,  false, false);
-        am.turn(0, AutoMovement.Directions.FORWARD, (int) (saizecicm * 2.4), 300, 2100, power, 1.5, sc, false, false);
+
+        af2.setOutputmotor(true, 1.25, false);
+
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.75), 300, 450, getPower(), af2);
+        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 2), 300, 1600, getPower(), af2);
+        af2.setOutputmotor(false, 0, false);
         //cub2
-        am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
-        sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        af2.setIntake(true);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm*0.5), 100, 500, getPower() * 0.35, af2);
         sleep(100);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
-        am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, getPower(), af2);
+        sleep(100);
+        af2.setIntake(false);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
+        af2.setOutputmotor(true, 1, true);
+        //am2.strafeWithGyro(0.2, AutoMovement2.Directions.RIGHT, 1);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*1.2), 300, 800, getPower(), af2);
+        af2.setOutputmotor(true, 0.75, true);
+        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -67, (int) (saizecicm*1.6), 300, 1300, getPower(), af2);
+        sleep(200);
+
         outputmotor.setPower(-1);
-        sleep(1000);
+        sleep(750);
         outputmotor.setPower(0);
-        am.driveToWithGyro(AutoMovement.Directions.FORWARD, (int) (saizecicm * 0.95), 300, 650, power, 1, sc,  false, false);
-        am.turn(0, AutoMovement.Directions.FORWARD, (int) (saizecicm * 2.5), 300, 2200, power, 1.5, sc, false, false);
+
+        af2.setOutputmotor(true, 1.25, false);
+
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.75), 300, 450, getPower(), af2);
+        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 2.1), 300, 1700, getPower(), af2);
+        af2.setOutputmotor(false, 0, false);
         //cub3
-        am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
-        sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        af2.setIntake(true);
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm*0.5), 100, 500, getPower() * 0.35, af2);
         sleep(100);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
-        am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, getPower(), af2);
+        sleep(100);
+        af2.setIntake(false);
+        intakeR.setPower(0);
+        intakeL.setPower(0);
+        af2.setOutputmotor(true, 1, true);
+        //am2.strafeWithGyro(0.2, AutoMovement2.Directions.RIGHT, 1);
+        am2.driveToWithGyro(AutoMovement2.Directions.BACKWARD, (int) (saizecicm*1.2), 300, 750, getPower(), af2);
+        af2.setOutputmotor(true, 0.75, true);
+        am2.turnWithGyro(AutoMovement2.Directions.BACKWARD, -67, (int) (saizecicm*1.6), 300, 1300, getPower(), af2);
+        sleep(200);
+
         outputmotor.setPower(-1);
-        sleep(1000);
+        sleep(750);
         outputmotor.setPower(0);
-        am.driveToWithGyro(AutoMovement.Directions.FORWARD, (int) (saizecicm * 0.95), 300, 650, power, 1, sc,  false, false);
-        am.turn(0, AutoMovement.Directions.FORWARD, (int) (saizecicm * 2.5), 300, 2200, power, 1.5, sc, false, false);*/
+
+        af2.setOutputmotor(true, 1.25, false);
+
+        am2.driveToWithGyro(AutoMovement2.Directions.FORWARD, (int) (saizecicm * 0.85), 300, 550, getPower(), af2);
+        am2.turnWithGyro(AutoMovement2.Directions.FORWARD, 0, (int) (saizecicm * 1.5), 300, 1200, getPower(), af2);
     }
 }

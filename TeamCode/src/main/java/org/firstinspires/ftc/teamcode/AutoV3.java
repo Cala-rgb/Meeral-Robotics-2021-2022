@@ -189,7 +189,7 @@ public class AutoV3 extends LinearOpMode {
         //cub preloaded si mama suge penis
         am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power, intakeR, intakeL, color, power);
         sleep(100);
         am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
         am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
@@ -201,7 +201,7 @@ public class AutoV3 extends LinearOpMode {
         //cub1
         am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(100);
         am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
         am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
@@ -213,7 +213,7 @@ public class AutoV3 extends LinearOpMode {
         //cub2
         am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(100);
         am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
         am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);
@@ -225,7 +225,7 @@ public class AutoV3 extends LinearOpMode {
         //cub3
         am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(500);
-        am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*0.25), 100, 150, power);
+        am.driveAndIntake(AutoMovement.Directions.FORWARD, (int) (saizecicm*0.3), 100, 200, power*0.35, intakeL, intakeR, color, power);
         sleep(100);
         am.driveBToWithGyro(AutoMovement.Directions.BACKWARD, (int) (saizecicm*1), 300, 700, power, 0.75, sc, false, true);
         am.turnB(-65, AutoMovement.Directions.BACKWARD, (int) (saizecicm*1.92), 300, 1600, power, 0.75, sc, false, true);

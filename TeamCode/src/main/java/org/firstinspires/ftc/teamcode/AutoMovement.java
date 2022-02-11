@@ -155,7 +155,7 @@ public class AutoMovement {
         setPowerToMotors(0);
     }
 
-    public void driveBToWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower) {
+    public void driveBToWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, DcMotor intakeL, DcMotor intakeR, ColorRangeSensor color, double power) {
         double targetAngle = getAngle();
         double startTime = lom.getRuntime();
         resetEncoders();
@@ -163,6 +163,11 @@ public class AutoMovement {
         setTargetVal();
         double gain = .015, myPow;
         while (frontRight.getCurrentPosition() <encoderTarget) {
+            if(color.getDistance(DistanceUnit.CM) < 10.0)
+            {
+                intakeR.setPower(0.7 * power);
+                intakeL.setPower(-0.7 * power);
+            }
             myPow = getCurrentPower(frontRight.getCurrentPosition(), encoderStopAccelerate, encoderStartBrake, encoderTarget, maxPower);
             double deviation = targetAngle - getAngle();
             lom.telemetry.addData("Deviation", deviation);
