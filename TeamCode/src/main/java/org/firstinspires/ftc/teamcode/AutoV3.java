@@ -55,6 +55,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+@Disabled
 @Autonomous(name="Autonom version 3", group="Autonom bomba")
 public class AutoV3 extends LinearOpMode {
 

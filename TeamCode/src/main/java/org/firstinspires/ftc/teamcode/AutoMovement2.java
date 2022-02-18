@@ -173,6 +173,80 @@ public class AutoMovement2 {
         setPowerToMotors(0);
     }
 
+    public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
+        double targetAngle = getAngle();
+
+        resetEncoders();
+        setDirection(direction);
+        setMotorModes();
+
+        double gain = -0.015, myPow, deviation;
+        if (direction == Directions.BACKWARD) {
+            gain = 0.015;
+        }
+
+        af2.prepareForQueries(maxPower);
+
+        while (getEncoderAverage() < encoderTarget) {
+
+            if(getEncoderAverage()>=startTurnTicks)
+                targetAngle = turnangle;
+
+            af2.executeQueries(maxPower);
+
+            deviation = targetAngle - getAngle();
+            if (deviation > 180) deviation -= 360;
+            else if (deviation < -180) deviation += 360;
+
+            myPow = getCurrentPower((int)getEncoderAverage(), encoderStopAccelerate, encoderStartBrake, encoderTarget, maxPower);
+
+            if(getEncoderAverage() >= startStrafeTicks && getEncoderAverage()<startStrafeTicks+strafeDurationTicks)
+            {
+                setPowerToMotors(myPow - gain * deviation - 0.65, myPow + gain * deviation , myPow - gain * deviation, myPow + gain * deviation - 0.65);
+            }
+            else {
+                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation);
+            }
+
+        }
+
+        setPowerToMotors(0);
+    }
+
+    public void driveToAndTurnWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2, double turnangle, int startTurnTicks) {
+        double targetAngle = getAngle();
+
+        resetEncoders();
+        setDirection(direction);
+        setMotorModes();
+
+        double gain = -0.015, myPow, deviation;
+        if (direction == Directions.BACKWARD) {
+            gain = 0.015;
+        }
+
+        af2.prepareForQueries(maxPower);
+
+        while (getEncoderAverage() < encoderTarget) {
+
+            if(getEncoderAverage()>=startTurnTicks)
+                targetAngle = turnangle;
+
+            af2.executeQueries(maxPower);
+
+            deviation = targetAngle - getAngle();
+            if (deviation > 180) deviation -= 360;
+            else if (deviation < -180) deviation += 360;
+
+            myPow = getCurrentPower((int)getEncoderAverage(), encoderStopAccelerate, encoderStartBrake, encoderTarget, maxPower);
+
+            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation);
+
+        }
+
+        setPowerToMotors(0);
+    }
+
     public void turnWithGyro(Directions direction, double angle, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2) {
         double targetAngle = angle;
 
