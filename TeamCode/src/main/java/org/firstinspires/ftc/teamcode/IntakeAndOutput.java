@@ -77,11 +77,11 @@ public class IntakeAndOutput {
     {
         if(down)
         {
-            totemServo.setPosition(0.5);
+            totemServo.setPosition(0.4);
         }
         else if(up)
         {
-            totemServo.setPosition(0.25);
+            totemServo.setPosition(0.2);
         }
         else
         {
@@ -96,8 +96,8 @@ public class IntakeAndOutput {
             intakemotor2.setPower(0.9 * rt);
         }
         else if(lt != 0 || time - lastTimeLuat <= 1000) {
-            intakemotor1.setPower(0.4 * lt);
-            intakemotor2.setPower(-0.4 * lt);
+            intakemotor1.setPower(0.4);
+            intakemotor2.setPower(-0.4);
         }
         else {
             intakemotor1.setPower(0);

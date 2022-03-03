@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -8,10 +10,15 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
 public class V1 extends OpMode {
@@ -31,8 +38,14 @@ public class V1 extends OpMode {
     private DcMotor outputmotor = null;
     private Movement mv;
     private IntakeAndOutput iao;
-    private double pow,bumpersteeringval,duckSpeed= -0.2;
-    private ColorRangeSensor color= null;
+    private double pow,bumpersteeringval,duckSpeed= -0.2,lasttimeb=0.0;
+    private RevColorSensorV3 color= null, under = null;
+    private VoltageSensor vs;
+
+    BNO055IMU imu;
+
+    private TeleOpAutoV1 toa;
+    private TeleOpFuncV1 tof;
 
     private  void getEngines()
     {
@@ -50,7 +63,9 @@ public class V1 extends OpMode {
         intakemotor1 = hardwareMap.get(DcMotor.class, "intakeR");
         intakemotor2 = hardwareMap.get(DcMotor.class, "intakeL");
         outputmotor = hardwareMap.get(DcMotor.class, "outputmotor");
-        color = hardwareMap.get(ColorRangeSensor.class, "color");
+        color = hardwareMap.get(RevColorSensorV3.class, "color");
+        vs = hardwareMap.voltageSensor.iterator().next();
+        under = hardwareMap.get(RevColorSensorV3.class, "under");
     }
 
     private void setDirections()
@@ -67,6 +82,38 @@ public class V1 extends OpMode {
         outputmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    private void autoMove()
+    {
+        tof.setTask(TeleOpFuncV1.Tasks.LEAVE_STORAGE);
+        tof.setOutputmotor(true, 0.75, false);
+        double cangle = getAngle();
+        toa.driveToAndTurnWithGyroWhen(TeleOpAutoV1.Directions.BACKWARD,1718, 1350,(11.0/vs.getVoltage()), tof, 61, true);
+        double time = getRuntime();
+        if(gamepad1.b)
+            return ;
+        while(getRuntime()-time<0.5)
+            outputmotor.setPower(1);
+        outputmotor.setPower(0);
+        tof.setOutputmotor(true, 2.5, true);
+        if(gamepad1.b)
+            return ;
+        toa.driveToAndTurnAndStrafeWithGyro(TeleOpAutoV1.Directions.FORWARD, (int) (1000*3.05), 300, 2300, (11.0/vs.getVoltage()), tof, cangle, 710,1000,1100);
+
+        tof.setOutputmotor(false, 0, false);
+        setDirections();
+    }
+
+    private boolean isPressed() {
+        if(gamepad1.a || gamepad1.b || gamepad1.x || gamepad1.y || gamepad1.start || gamepad1.options || gamepad1.right_bumper || gamepad1.right_trigger!=0 || gamepad1.left_bumper || gamepad1.left_trigger!=0 || gamepad1.right_stick_y!=0 || gamepad1.right_stick_x!=0 || gamepad1.left_stick_x!=0 || gamepad1.left_stick_y!=0 || gamepad1.dpad_left || gamepad1.dpad_right || gamepad1.dpad_up || gamepad1.dpad_down)
+            return true;
+        return false;
+    }
+
+    private double getAngle() {
+        Orientation angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return angle.firstAngle;
+    }
+
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -75,9 +122,21 @@ public class V1 extends OpMode {
 
         setDirections();
 
-        mv = new Movement(fl,fr,bl,br);
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+        imu.initialize(parameters);
+
+        mv = new Movement(fl,fr,bl,br,outputmotor,imu,vs,under,this);
 
         iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,liftServoR, liftServoL, totemServo, duckServo, color, this);
+
+        toa = new TeleOpAutoV1(this, imu, fr, fl, br, bl, vs);
+
+        tof = new TeleOpFuncV1(this, intakemotor1, intakemotor2,outputmotor, color, under, duckServo, liftServoR, liftServoL);
 
         bumpersteeringval = 0.25;
 
@@ -108,12 +167,13 @@ public class V1 extends OpMode {
             pow = .25;
         else
             pow=0.5;
-        if(gamepad1.right_bumper)
-            mv.bumbersteering(bumpersteeringval);
-        if(gamepad1.left_bumper)
-            mv.bumbersteering(-bumpersteeringval);
+        if(gamepad1.b)
+            autoMove();
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
-        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+        if(gamepad1.left_bumper) {
+            mv.break_func();
+        }
+        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_right, gamepad2.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -13,17 +14,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-public class AutoMovement2 {
+public class TeleOpAutoV1 {
     private DcMotor frontRight, frontLeft, backRight, backLeft;
     private BNO055IMU imu;
-    private LinearOpMode lom;
+    private OpMode lom;
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
+    int startTurnAfter = 200;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
-    public AutoMovement2 (LinearOpMode lom, BNO055IMU imu, DcMotor frontRight, DcMotor frontLeft, DcMotor backRight, DcMotor backLeft, VoltageSensor vs) {
+    public TeleOpAutoV1 (OpMode lom, BNO055IMU imu, DcMotor frontRight, DcMotor frontLeft, DcMotor backRight, DcMotor backLeft, VoltageSensor vs) {
         this.lom = lom;
         this.imu = imu;
         this.frontRight = frontRight;
@@ -57,6 +59,12 @@ public class AutoMovement2 {
 
     private double getEncoderAverage() {
         return (frontRight.getCurrentPosition() + frontLeft.getCurrentPosition() + backRight.getCurrentPosition() + backLeft.getCurrentPosition()) / 4.0;
+    }
+
+    private boolean isPressed() {
+        if(lom.gamepad1.a || lom.gamepad1.b || lom.gamepad1.x || lom.gamepad1.y || lom.gamepad1.start || lom.gamepad1.options || lom.gamepad1.right_bumper || lom.gamepad1.right_trigger!=0 || lom.gamepad1.left_bumper || lom.gamepad1.left_trigger!=0 || lom.gamepad1.right_stick_y!=0 || lom.gamepad1.right_stick_x!=0 || lom.gamepad1.left_stick_x!=0 || lom.gamepad1.left_stick_y!=0 || lom.gamepad1.dpad_left || lom.gamepad1.dpad_right || lom.gamepad1.dpad_up || lom.gamepad1.dpad_down)
+            return true;
+        return false;
     }
 
     public void resetEncoders() {
@@ -142,7 +150,7 @@ public class AutoMovement2 {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public void driveToWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2) {
+    public void driveToWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3) {
         double targetAngle = getAngle();
 
         resetEncoders();
@@ -154,11 +162,11 @@ public class AutoMovement2 {
             gain = 0.015;
         }
 
-        af2.prepareForQueries(maxPower);
+        af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && getEncoderAverage() < encoderTarget) {
+        while (getEncoderAverage() < encoderTarget) {
 
-            af2.executeQueries(maxPower);
+            af3.executeQueries(maxPower);
 
             deviation = targetAngle - getAngle();
             if (deviation > 180) deviation -= 360;
@@ -173,7 +181,7 @@ public class AutoMovement2 {
         setPowerToMotors(0);
     }
 
-    public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
+    public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, TeleOpFuncV1 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
         double targetAngle = getAngle();
 
         resetEncoders();
@@ -185,14 +193,17 @@ public class AutoMovement2 {
             gain = 0.015;
         }
 
-        af2.prepareForQueries(maxPower);
+        af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && getEncoderAverage() < encoderTarget) {
+        while (getEncoderAverage() < encoderTarget) {
+
+            if(isPressed())
+                return ;
 
             if(getEncoderAverage()>=startTurnTicks)
                 targetAngle = turnangle;
 
-            af2.executeQueries(maxPower);
+            af3.executeQueries(maxPower);
 
             deviation = targetAngle - getAngle();
             if (deviation > 180) deviation -= 360;
@@ -213,7 +224,7 @@ public class AutoMovement2 {
         setPowerToMotors(0);
     }
 
-    public void driveToAndTurnWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2, double turnangle, int startTurnTicks) {
+    public void driveToAndTurnWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double turnangle, int startTurnTicks) {
         double targetAngle = getAngle();
 
         resetEncoders();
@@ -225,14 +236,14 @@ public class AutoMovement2 {
             gain = 0.015;
         }
 
-        af2.prepareForQueries(maxPower);
+        af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && getEncoderAverage() < encoderTarget) {
+        while (getEncoderAverage() < encoderTarget) {
 
             if(getEncoderAverage()>=startTurnTicks)
                 targetAngle = turnangle;
 
-            af2.executeQueries(maxPower);
+            af3.executeQueries(maxPower);
 
             deviation = targetAngle - getAngle();
             if (deviation > 180) deviation -= 360;
@@ -247,8 +258,10 @@ public class AutoMovement2 {
         setPowerToMotors(0);
     }
 
-    public void driveToAndTurnWithGyroWhen(Directions direction, int encoderTarget, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double  startangle, double turnangle) {
-        double targetAngle =startangle;
+    public void driveToAndTurnWithGyroWhen(Directions direction, int encoderTarget, int encoderStartBrake, double maxPower, TeleOpFuncV1 af3, double turnangle, boolean ok) {
+        double targetAngle =getAngle();
+
+        double lastTime = lom.getRuntime();
 
         resetEncoders();
         setDirection(direction);
@@ -261,7 +274,10 @@ public class AutoMovement2 {
 
         af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && af3.getCurrentTask() != AutoFunctionsV3.Tasks.NONE) {
+        while (af3.getCurrentTask() != TeleOpFuncV1.Tasks.NONE) {
+
+            if(isPressed() && lom.getRuntime()-lastTime>0.5)
+                return ;
 
             af3.updateTask();
             af3.executeQueries(maxPower);
@@ -270,19 +286,41 @@ public class AutoMovement2 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.834576347857835;
+            myPow = maxPower*0.8;
 
-            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation);
+            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.5, myPow - gain * deviation-0.5, myPow + gain * deviation);
 
         }
 
         double distance = getEncoderAverage();
+        af3.setIntake(false);
 
+        while((int) (getEncoderAverage()-distance)<startTurnAfter && ok)
+        {
+
+            if(isPressed())
+                return ;
+
+            af3.executeQueries(maxPower);
+
+            deviation = targetAngle - getAngle();
+            if (deviation > 180) deviation -= 360;
+            else if (deviation < -180) deviation += 360;
+
+            myPow = maxPower;
+
+            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation);
+        }
+
+        distance = getEncoderAverage();
 
         lom.telemetry.addData("Done: ", distance);
         lom.telemetry.update();
-        targetAngle = turnangle;
-        while (lom.opModeIsActive() && (getEncoderAverage() - distance) < encoderTarget) {
+        targetAngle = targetAngle - turnangle;
+        while ((getEncoderAverage() - distance) < encoderTarget) {
+
+            if(isPressed())
+                return ;
 
             af3.executeQueries(maxPower);
 
@@ -313,7 +351,7 @@ public class AutoMovement2 {
 
         af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && af3.getCurrentTask() != AutoFunctionsV3.Tasks.NONE) {
+        while (af3.getCurrentTask() != AutoFunctionsV3.Tasks.NONE) {
 
             af3.executeQueries(maxPower);
             af3.updateTask();
@@ -330,7 +368,7 @@ public class AutoMovement2 {
         setPowerToMotors(0);
     }
 
-    public void turnWithGyro(Directions direction, double angle, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV2 af2) {
+    public void turnWithGyro(Directions direction, double angle, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3) {
         double targetAngle = angle;
 
         resetEncoders();
@@ -342,11 +380,11 @@ public class AutoMovement2 {
             gain = 0.007;
         }
 
-        af2.prepareForQueries(maxPower);
+        af3.prepareForQueries(maxPower);
 
-        while (lom.opModeIsActive() && getEncoderAverage() < encoderTarget) {
+        while (getEncoderAverage() < encoderTarget) {
 
-            af2.executeQueries(maxPower);
+            af3.executeQueries(maxPower);
 
             deviation = targetAngle - getAngle();
             if (deviation > 180) deviation -= 360;
@@ -381,7 +419,7 @@ public class AutoMovement2 {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         double gain = .01, accelerateGain = 0.05, myPow = minPower, brakeGain = 0.05;
         setPowerToMotors(myPow);
-        while (lom.opModeIsActive() && frontRight.isBusy()) {
+        while (frontRight.isBusy()) {
             if (myPow < pow) {
                 myPow += accelerateGain;
             }
