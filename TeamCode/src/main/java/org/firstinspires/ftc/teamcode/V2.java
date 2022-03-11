@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
-public class V1 extends OpMode {
+public class V2 extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor fl = null;
     private DcMotor fr = null;
@@ -38,7 +38,7 @@ public class V1 extends OpMode {
     private DcMotor outputmotor = null;
     private Movement mv;
     private IntakeAndOutput iao;
-    private double pow,bumpersteeringval,duckSpeed= -0.2,lasttimeb=0.0;
+    private double pow,bumpersteeringval,duckSpeed= -0.2,lasttimeb=0.0,lasttimex=0.0,cangle;
     private RevColorSensorV3 color= null, under = null;
     private VoltageSensor vs;
 
@@ -46,6 +46,8 @@ public class V1 extends OpMode {
 
     private TeleOpAutoV1 toa;
     private TeleOpFuncV1 tof;
+
+    private boolean autoMove = false;
 
     private  void getEngines()
     {
@@ -82,25 +84,24 @@ public class V1 extends OpMode {
         outputmotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    private void autoMove()
-    {
-        tof.setTask(TeleOpFuncV1.Tasks.LEAVE_STORAGE);
-        tof.setOutputmotor(true, 0.75, false);
-        double cangle = getAngle();
-        toa.driveToAndTurnWithGyroWhen(TeleOpAutoV1.Directions.BACKWARD,1718, 1350,(11.0/vs.getVoltage()), tof, 61, true);
-        double time = getRuntime();
-        if(gamepad1.b)
-            return ;
-        while(getRuntime()-time<0.5)
-            outputmotor.setPower(1);
-        outputmotor.setPower(0);
-        tof.setOutputmotor(true, 2.5, true);
-        if(gamepad1.b)
-            return ;
-        toa.driveToAndTurnAndStrafeWithGyro(TeleOpAutoV1.Directions.FORWARD, (int) (1000*3.05), 300, 2300, (11.0/vs.getVoltage()), tof, cangle, 710,1000,1100);
+    private void autoMoveF() {
+            tof.setTask(TeleOpFuncV1.Tasks.LEAVE_STORAGE);
+            tof.setOutputmotor(true, 0.7, false);
+            cangle = getAngle();
+            toa.driveToAndTurnWithGyroWhen(TeleOpAutoV1.Directions.BACKWARD, 1581, 1300, (11.0 / vs.getVoltage()), tof, 65.7, true);
+            double t = getRuntime();
+            while (getRuntime() - t < 0.1)
+                outputmotor.setPower(0.1);
+            if (isPressed())
+                return;
+    }
+    private void autoMoveB() {
+            tof.setTask(TeleOpFuncV1.Tasks.NONE);
+            tof.setOutputmotor(true, 1.4, true);
+            toa.driveToAndTurnAndStrafeWithGyro(TeleOpAutoV1.Directions.FORWARD, (int) (1000*3), 300, 2300, (11.0/vs.getVoltage()), tof, cangle, 740,1100,1500);
 
-        tof.setOutputmotor(false, 0, false);
-        setDirections();
+            tof.setOutputmotor(false, 0, false);
+            setDirections();
     }
 
     private boolean isPressed() {
@@ -156,24 +157,36 @@ public class V1 extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addData("colorr", color.red());
+        /*telemetry.addData("colorr", color.red());
         telemetry.addData("colorg", color.green());
         telemetry.addData("colorb", color.blue());
         telemetry.addData("dist", color.getDistance(DistanceUnit.CM));
-        telemetry.update();
+        telemetry.update();*/
         if(gamepad1.a)
             pow =1;
         else if (gamepad1.y)
             pow = .25;
         else
             pow=0.58;
-        if(gamepad1.b)
-            autoMove();
+        if(gamepad2.b) {
+            autoMove =! autoMove;
+            gamepad1.rumble(500);
+            gamepad2.rumble(500);
+        }
+        if(gamepad1.b && getRuntime()-lasttimeb>0.5) {
+            lasttimeb = getRuntime();
+            autoMoveF();
+        }
+        if(gamepad1.x && getRuntime()-lasttimex>0.5) {
+            lasttimex = getRuntime();
+            autoMoveB();
+        }
         mv.move(gamepad1.right_trigger, gamepad1.left_trigger, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y, pow);
         if(gamepad1.right_bumper) {
             mv.break_func();
         }
         iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_right, gamepad2.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+
     }
 
     @Override

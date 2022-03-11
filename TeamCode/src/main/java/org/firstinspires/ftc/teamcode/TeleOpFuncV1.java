@@ -76,7 +76,7 @@ public class TeleOpFuncV1 {
             outputmotor.setPower(0);
         }
         if (intakeEnabled) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0)
+            if(color.getDistance(DistanceUnit.CM) < 5.0)
             {
                 intakeR.setPower(0.7);
                 intakeL.setPower(-0.7);
@@ -98,10 +98,10 @@ public class TeleOpFuncV1 {
             liftServoL.setPower(0);
         }
         if (outputmotorEnabled && OpMode.getRuntime() - initialTime >= outputmotorStop) {
-            outputmotor.setPower(0);
+            outputmotor.setPower(0.1);
         }
         if (intakeEnabled) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0)
+            if(color.getDistance(DistanceUnit.CM) < 5.0)
             {
                 intakeR.setPower(0.7);
                 intakeL.setPower(-0.7);
@@ -138,16 +138,16 @@ public class TeleOpFuncV1 {
         double blue = under.blue();
         double green = under.green();
         int alpha = under.alpha();
-        OpMode.telemetry.addData("Red", red);
+        /*OpMode.telemetry.addData("Red", red);
         OpMode.telemetry.addData("Green", green);
         OpMode.telemetry.addData("Blue", blue);
         OpMode.telemetry.addData("alpha", alpha);
-        OpMode.telemetry.update();
+        OpMode.telemetry.update();*/
         if (currentTask == Tasks.LEAVE_STORAGE && (alpha > 800 || red + green + blue > 1450.0)) {
             currentTask = Tasks.NONE;
         }
         else if (currentTask == Tasks.TAKE_FREIGHT) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0) {
+            if(color.getDistance(DistanceUnit.CM) < 5.0) {
                 currentTask = Tasks.NONE;
             }
         }

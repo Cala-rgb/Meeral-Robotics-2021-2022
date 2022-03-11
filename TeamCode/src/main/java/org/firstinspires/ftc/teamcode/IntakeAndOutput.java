@@ -54,6 +54,15 @@ public class IntakeAndOutput {
         treatOutput(joy2);
     }
 
+    public void verifyAll(double rt, double lt, boolean up, boolean down, boolean right, boolean left, double joy2, double time)
+    {
+        turnOnIntake(rt, lt, time);
+        lift(right, left);
+        totem(up, down);
+        luatobiect(time, opm);
+        treatOutput(joy2);
+    }
+
     void lift(boolean right, boolean left)
     {
         if(left)
@@ -92,8 +101,8 @@ public class IntakeAndOutput {
     void turnOnIntake(double rt, double lt, double time)
     {
         if(rt != 0 && !luat){
-            intakemotor1.setPower(-0.9 * rt);
-            intakemotor2.setPower(0.9 * rt);
+            intakemotor1.setPower(-0.7 * rt);
+            intakemotor2.setPower(0.7 * rt);
         }
         else if(lt != 0 || time - lastTimeLuat <= 1000) {
             intakemotor1.setPower(0.4);
@@ -105,11 +114,12 @@ public class IntakeAndOutput {
         }
     }
 
+
     void luatobiect(double time, OpMode opm)
     {
-        if(color.getDistance(DistanceUnit.CM) < 10.0)
+        if(color.getDistance(DistanceUnit.CM) < 5.0)
         {
-            if (luat == false) {
+            if (!luat) {
                 lastTimeLuat = time;
                 opm.gamepad1.rumble(1.0, 1.0, 300);
                 opm.gamepad2.rumble(1.0, 1.0, 300);
@@ -122,7 +132,7 @@ public class IntakeAndOutput {
     }
 
     void treatOutput(double joy2) {
-        outputmotor.setPower(joy2 * -0.8);
+            outputmotor.setPower(joy2 * -0.8);
     }
 
     void ratusca(boolean start) {

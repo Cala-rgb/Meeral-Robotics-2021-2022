@@ -39,7 +39,7 @@ public class TeleOPsolo extends OpMode {
     private Movement mv;
     private IntakeAndOutput iao;
     private double pow,bumpersteeringval,duckSpeed= -0.2;
-    private RevColorSensorV3 color= null, under = null;
+    private RevColorSensorV3 color= null, under = null, under2 = null;
     private double leftbump = 0;
     private double rightbump = 0;
     private double carut = 0;
@@ -69,6 +69,7 @@ public class TeleOPsolo extends OpMode {
         under = hardwareMap.get(RevColorSensorV3.class, "under");
         vs = hardwareMap.voltageSensor.iterator().next();
         under = hardwareMap.get(RevColorSensorV3.class, "under");
+        under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
     }
 
     private void setDirections()
@@ -90,17 +91,16 @@ public class TeleOPsolo extends OpMode {
         return angle.firstAngle;
     }
 
-    private void autoMove()
-    {
+    private void autoMove() {
         tof.setTask(TeleOpFuncV1.Tasks.LEAVE_STORAGE);
-        tof.setOutputmotor(true, 0.75, false);
+        tof.setOutputmotor(true, 0.8, false);
         double cangle = getAngle();
-        toa.driveToAndTurnWithGyroWhen(TeleOpAutoV1.Directions.BACKWARD,1721, 1350,(11.0/vs.getVoltage()), tof, 61, true);
+        toa.driveToAndTurnWithGyroWhen(TeleOpAutoV1.Directions.BACKWARD,1733, 1450,(11.0/vs.getVoltage()), tof, 63.21, true);
         double time = getRuntime();
         if(gamepad1.b)
             return ;
-        while(getRuntime()-time<0.5)
-            outputmotor.setPower(1);
+        while(getRuntime()-time<0.6)
+            outputmotor.setPower(0.85);
         outputmotor.setPower(0);
         tof.setOutputmotor(true, 2.5, true);
         if(gamepad1.b)
@@ -144,6 +144,7 @@ public class TeleOPsolo extends OpMode {
 
     @Override
     public void init_loop() {
+
     }
 
     @Override

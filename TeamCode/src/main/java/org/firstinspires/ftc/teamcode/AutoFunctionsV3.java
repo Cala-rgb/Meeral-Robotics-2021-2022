@@ -66,10 +66,10 @@ public class AutoFunctionsV3 {
         }
         if (outputmotorEnabled) {
             if (outputmotorForward) {
-                outputmotor.setPower(-1);
+                outputmotor.setPower(-0.9);
             }
             else {
-                outputmotor.setPower(1);
+                outputmotor.setPower(0.9);
             }
         }
         else
@@ -77,14 +77,14 @@ public class AutoFunctionsV3 {
             outputmotor.setPower(0);
         }
         if (intakeEnabled) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0)
+            if(color.getDistance(DistanceUnit.CM) < 5.0)
             {
                 intakeR.setPower(0.7);
                 intakeL.setPower(-0.7);
             }
             else {
-                intakeR.setPower(-1);
-                intakeL.setPower(1);
+                intakeR.setPower(-0.7);
+                intakeL.setPower(0.7);
             }
         }
         else {
@@ -99,12 +99,17 @@ public class AutoFunctionsV3 {
             liftServoL.setPower(0);
         }
         if (outputmotorEnabled && linearOpMode.getRuntime() - initialTime >= outputmotorStop) {
-            outputmotor.setPower(-0.15);
+            outputmotor.setPower(-0.08);
         }
         if (intakeEnabled) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0) {
+            if(color.getDistance(DistanceUnit.CM) < 5.0)
+            {
                 intakeR.setPower(0.7);
                 intakeL.setPower(-0.7);
+            }
+            else {
+                intakeR.setPower(-0.7);
+                intakeL.setPower(0.7);
             }
         }
     }
@@ -139,6 +144,7 @@ public class AutoFunctionsV3 {
         alphatotal = totalalpha;
     }
 
+    //TODO: fix sensor
     public void updateTask() {
         double red = under.red();
         double blue = under.blue();
@@ -148,16 +154,14 @@ public class AutoFunctionsV3 {
         double blue2 = under2.blue();
         double green2 = under2.green();
         int alpha2 = under2.alpha();
-        linearOpMode.telemetry.addData("Red", red);
-        linearOpMode.telemetry.addData("Green", green);
-        linearOpMode.telemetry.addData("Blue", blue);
+        linearOpMode.telemetry.addData("Rgb", red+blue+blue);
         linearOpMode.telemetry.addData("alpha", alpha);
         linearOpMode.telemetry.update();
         if (currentTask == Tasks.LEAVE_STORAGE && ((alpha > alphatotal || red + green + blue > colorsumtotal) || (alpha2 > alphatotal || red2 + green2 + blue2 > colorsumtotal))) {
             currentTask = Tasks.NONE;
         }
         else if (currentTask == Tasks.TAKE_FREIGHT) {
-            if(color.getDistance(DistanceUnit.CM) < 10.0) {
+            if(color.getDistance(DistanceUnit.CM) < 5.0) {
                 currentTask = Tasks.NONE;
             }
         }

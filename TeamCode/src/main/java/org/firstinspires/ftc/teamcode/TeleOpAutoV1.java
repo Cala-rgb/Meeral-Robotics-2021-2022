@@ -21,7 +21,7 @@ public class TeleOpAutoV1 {
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
-    int startTurnAfter = 200;
+    int startTurnAfter = 250;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
@@ -182,7 +182,9 @@ public class TeleOpAutoV1 {
     }
 
     public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, TeleOpFuncV1 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
-        double targetAngle = getAngle();
+        double targetAngle = getAngle()-10;
+
+        double lasttime = lom.getRuntime();
 
         resetEncoders();
         setDirection(direction);
@@ -194,10 +196,15 @@ public class TeleOpAutoV1 {
         }
 
         af3.prepareForQueries(maxPower);
+        lom.telemetry.addData("ok",getEncoderAverage());
+        lom.telemetry.update();
 
         while (getEncoderAverage() < encoderTarget) {
 
-            if(isPressed())
+            lom.telemetry.addData("ok2",getEncoderAverage());
+            lom.telemetry.update();
+
+            if(isPressed() && lom.getRuntime()-lasttime >0.5)
                 return ;
 
             if(getEncoderAverage()>=startTurnTicks)
@@ -274,7 +281,7 @@ public class TeleOpAutoV1 {
 
         af3.prepareForQueries(maxPower);
 
-        while (af3.getCurrentTask() != TeleOpFuncV1.Tasks.NONE) {
+        while (af3.getCurrentTask() != TeleOpFuncV1.Tasks.NONE && getEncoderAverage() < 1500) {
 
             if(isPressed() && lom.getRuntime()-lastTime>0.5)
                 return ;
@@ -286,10 +293,15 @@ public class TeleOpAutoV1 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.8;
+            myPow = maxPower*0.75;
 
-            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.5, myPow - gain * deviation-0.5, myPow + gain * deviation);
+            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.6, myPow - gain * deviation-0.6, myPow + gain * deviation);
 
+        }
+
+        if(TeleOpFuncV1.Tasks.NONE != af3.getCurrentTask()) {
+            setPowerToMotors(0);
+            return;
         }
 
         double distance = getEncoderAverage();

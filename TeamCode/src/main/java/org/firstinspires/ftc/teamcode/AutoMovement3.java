@@ -20,7 +20,7 @@ public class AutoMovement3 {
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
-    int startTurnAfter = 100;
+    int startTurnAfter = 250;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
@@ -283,7 +283,7 @@ public class AutoMovement3 {
             setDirection(Directions.FORWARD);
             resetEncoders();
 
-            while(lom.opModeIsActive() && getEncoderAverage()<=1800)
+            while(lom.opModeIsActive() && getEncoderAverage()<=1300)
             {
 
                 //af3.executeQueries(maxPower);
@@ -380,7 +380,7 @@ public class AutoMovement3 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.8;
+            myPow = maxPower*0.75;
 
             setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.1, myPow - gain * deviation-0.1, myPow + gain * deviation);
 
@@ -394,7 +394,7 @@ public class AutoMovement3 {
             af3.setColorAndAlpha(3050.0, 1800.0);
             lom.sleep(300);
 
-            while(lom.opModeIsActive() && getEncoderAverage()<=1700)
+            while(lom.opModeIsActive() && getEncoderAverage()<=1500)
             {
 
                 //af3.executeQueries(maxPower);
@@ -405,7 +405,7 @@ public class AutoMovement3 {
 
                 myPow = maxPower*1;
 
-                setPowerToMotors(myPow + gain * deviation-0.2, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.2);
+                setPowerToMotors(myPow + gain * deviation-0.5, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.5);
             }
             resetEncoders();
             setDirection(direction);
@@ -423,7 +423,7 @@ public class AutoMovement3 {
 
                 myPow = maxPower*0.75;
 
-                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.2, myPow - gain * deviation-0.2, myPow + gain * deviation);
+                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.3, myPow - gain * deviation-0.3, myPow + gain * deviation);
 
             }
         }
