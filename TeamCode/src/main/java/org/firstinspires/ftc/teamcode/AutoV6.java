@@ -189,7 +189,7 @@ public class AutoV6 extends LinearOpMode {
         am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, -64, (int) (saizecicm * 1.38), 300, 1150, getPower() * 0.45, af3);
 
         if(uptime==3)
-            sleep(700);
+            sleep(200);
 
         //Lasam cubul preloaded
         liftServoR.setPower(0);
@@ -222,7 +222,7 @@ public class AutoV6 extends LinearOpMode {
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
         af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.55), 1500, getPower(), af3, 3,-73.23829463,true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.5), 1500, getPower(), af3, 3,-73.23829463,true);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -237,7 +237,7 @@ public class AutoV6 extends LinearOpMode {
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.2), 300, 2300, getPower(), af3, 0, 595,1000,1500);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.2), 300, 2300, getPower(), af3, 0, 585,1000,1500);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);
@@ -303,7 +303,7 @@ public class AutoV6 extends LinearOpMode {
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
         af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.6), 1500, getPower(), af3, 3,-73.23829463,true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.55), 1500, getPower(), af3, 3,-73.23829463,true);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -318,7 +318,7 @@ public class AutoV6 extends LinearOpMode {
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.05), 300, 2300, getPower(), af3, 0, 555,1000,1500);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.05), 300, 2300, getPower(), af3, 0, 545,1000,1500);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);

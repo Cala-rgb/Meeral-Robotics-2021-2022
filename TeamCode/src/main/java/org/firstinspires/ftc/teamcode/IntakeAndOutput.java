@@ -132,7 +132,7 @@ public class IntakeAndOutput {
     }
 
     void treatOutput(double joy2) {
-            outputmotor.setPower(joy2 * -0.8);
+            outputmotor.setPower(joy2 * -0.6);
     }
 
     void ratusca(boolean start) {
