@@ -57,30 +57,35 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Autonom picior", group="Autonom bomba")
-//@Disabled
-public class AutoPicior extends LinearOpMode {
+@Autonomous(name = ":(", group="Autono")
+public class MotoareIei extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL, outputmotor;
     private AutoMovement3 am3;
     private BNO055IMU imu;
-    private CRServo lift;
-    private Servo preloadedServo;
+    private CRServo duckServo1, duckServo2, liftServoR, liftServoL;
+    private Servo preloadedServo, totemServo;
     private OpenCvWebcam webcam;
-    private RevColorSensorV3 color, under,under2;
+    private RevColorSensorV3 color, under, under2;
     private TeamElementPipeline pipeline;
     private TeamElementPipeline.TeamElementPosition snapshotAnalysis = TeamElementPipeline.TeamElementPosition.LEFT;
     private ServoController sc;
     private AutoFunctionsV3 af3;
     int nouazecigrade = 610;
     int saizecicm = 1000;
-    double uptime;
+    double uptime,distmulti=1.4;
     double startVoltage,minVoltage=20.0;
     VoltageSensor vs;
 
     private void getHardware() {
 
+        duckServo1 = hardwareMap.get(CRServo.class, "duckServo1");
+        duckServo2 = hardwareMap.get(CRServo.class, "duckServo2");
+        liftServoL = hardwareMap.get(CRServo.class, "lift2");
+        liftServoR = hardwareMap.get(CRServo.class, "lift1");
+        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         frontLeft  = hardwareMap.get(DcMotor.class, "fl");
         frontRight = hardwareMap.get(DcMotor.class, "fr");
@@ -93,9 +98,10 @@ public class AutoPicior extends LinearOpMode {
         color = hardwareMap.get(RevColorSensorV3.class, "color");
         under = hardwareMap.get(RevColorSensorV3.class, "under");
         under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
-        lift = hardwareMap.get(CRServo.class, "lift");
 
         vs = hardwareMap.voltageSensor.iterator().next();
+        duckServo1.setDirection(DcMotorSimple.Direction.REVERSE);
+        duckServo2.setDirection(DcMotorSimple.Direction.REVERSE);
         //?
     }
 
@@ -108,55 +114,14 @@ public class AutoPicior extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new TeamElementPipeline();
-        webcam.setPipeline(pipeline);
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640,480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled = false;
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        telemetry = dashboard.getTelemetry();
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-
-        imu.initialize(parameters);
-
-        telemetry.addData("Mode", "calibrating...");
-        telemetry.update();
-
-        // make sure the imu gyro is calibrated before continuing.
-        while ((!isStarted() && !isStopRequested()) || !imu.isGyroCalibrated())
-        {
-            snapshotAnalysis = pipeline.getAnalysis();
-            telemetry.addData("Realtime analysis", pipeline.getAnalysis());
-            telemetry.update();
-            sleep(50);
-            idle();
-        }
-
         getHardware();
-        am3 = new AutoMovement3(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
-        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2,lift);
-
-        //am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 3000, 300, 2700, 0.3, af3);
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD,4000, 300, 3700, 0.5, af3, -45, 750, 2000, 1000, false);
+        waitForStart();
+        duckServo1.setPower(1);
+        sleep(1000);
+        duckServo1.setPower(0);
+        sleep(1000);
+        duckServo2.setPower(1);
+        sleep(1000);
+        duckServo2.setPower(0);
     }
 }

@@ -17,7 +17,7 @@ public class TeleOpFuncV1 {
 
     private DcMotor intakeR, intakeL, outputmotor;
     private RevColorSensorV3 color, under;
-    private CRServo duckServo, liftServoR, liftServoL;
+    private CRServo duckServo, lift;
     private OpMode OpMode;
 
     private boolean elevatorEnabled = false, outputmotorEnabled = false, intakeEnabled = false;
@@ -33,7 +33,7 @@ public class TeleOpFuncV1 {
     //Tasks - regleaza miscarea
     //Queries -  se executa in timpul miscarii
 
-    public TeleOpFuncV1(OpMode lom, DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, RevColorSensorV3 color, RevColorSensorV3 under, CRServo duckServo, CRServo liftServoR, CRServo liftServoL)
+    public TeleOpFuncV1(OpMode lom, DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, RevColorSensorV3 color, RevColorSensorV3 under, CRServo duckServo, CRServo lift)
     {
         this.intakeR = intakeR;
         this.intakeL = intakeL;
@@ -41,8 +41,7 @@ public class TeleOpFuncV1 {
         this.under = under;
         this.duckServo = duckServo;
         this.outputmotor = outputmotor;
-        this.liftServoR = liftServoR;
-        this.liftServoL = liftServoL;
+        this.lift = lift;
         this.OpMode = lom;
     }
 
@@ -50,18 +49,15 @@ public class TeleOpFuncV1 {
         initialTime = OpMode.getRuntime();
         if (elevatorEnabled) {
             if (elevatorForward) {
-                liftServoR.setPower(-1);
-                liftServoL.setPower(1);
+                lift.setPower(-1);
             }
             else {
-                liftServoR.setPower(1);
-                liftServoL.setPower(-1);
+                lift.setPower(1);
             }
         }
         else
         {
-            liftServoR.setPower(0);
-            liftServoL.setPower(0);
+            lift.setPower(0);
         }
         if (outputmotorEnabled) {
             if (outputmotorForward) {
@@ -94,8 +90,7 @@ public class TeleOpFuncV1 {
 
     public void executeQueries(double power) {
         if (elevatorEnabled && OpMode.getRuntime() - initialTime >= elevatorStop) {
-            liftServoR.setPower(0);
-            liftServoL.setPower(0);
+                lift.setPower(0);
         }
         if (outputmotorEnabled && OpMode.getRuntime() - initialTime >= outputmotorStop) {
             outputmotor.setPower(0.1);

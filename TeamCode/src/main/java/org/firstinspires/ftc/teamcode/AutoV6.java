@@ -57,15 +57,15 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Autonom version 6", group="Autonom finale")
+@Autonomous(name = "Autonom version 6 RED", group="Autonom competitie")
 public class AutoV6 extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL, outputmotor;
     private AutoMovement3 am3;
     private BNO055IMU imu;
-    private CRServo duckServo, liftServoR, liftServoL;
-    private Servo preloadedServo, totemServo;
+    private CRServo  lift;
+    private Servo preloadedServo;
     private OpenCvWebcam webcam;
     private RevColorSensorV3 color, under, under2;
     private TeamElementPipeline pipeline;
@@ -74,16 +74,14 @@ public class AutoV6 extends LinearOpMode {
     private AutoFunctionsV3 af3;
     int nouazecigrade = 610;
     int saizecicm = 1000;
-    double uptime;
+    double uptime,distmulti=1.4;
     double startVoltage,minVoltage=20.0;
     VoltageSensor vs;
+    FtcDashboard dashboard;
 
     private void getHardware() {
 
-        duckServo = hardwareMap.get(CRServo.class, "duckServo");
-        liftServoL = hardwareMap.get(CRServo.class, "lift2");
-        liftServoR = hardwareMap.get(CRServo.class, "lift1");
-        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        lift = hardwareMap.get(CRServo.class, "lift");
         preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         frontLeft  = hardwareMap.get(DcMotor.class, "fl");
@@ -99,7 +97,10 @@ public class AutoV6 extends LinearOpMode {
         under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
 
         vs = hardwareMap.voltageSensor.iterator().next();
-        duckServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        //duckServo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeR.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeL.setDirection(DcMotorSimple.Direction.FORWARD);
         //?
     }
 
@@ -135,7 +136,7 @@ public class AutoV6 extends LinearOpMode {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = false;
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+        //dashboard = FtcDashboard.getInstance();
         //telemetry = dashboard.getTelemetry();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -158,9 +159,10 @@ public class AutoV6 extends LinearOpMode {
 
         getHardware();
 
-        sc = new ServoController(liftServoR, liftServoL, outputmotor);
         am3 = new AutoMovement3(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
-        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2,duckServo, liftServoR, liftServoL);
+        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2, lift);
+
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
             uptime = 0;
@@ -169,7 +171,7 @@ public class AutoV6 extends LinearOpMode {
             uptime = 0.9;
         }
         else {
-            uptime = 3;
+            uptime = 3.2;
         }
 
         telemetry.addData("Mode", "calibrated");
@@ -179,40 +181,42 @@ public class AutoV6 extends LinearOpMode {
 
         //Setam servourile la pozitilor lor
 
-        preloadedServo.setPosition(0.65);
-        totemServo.setPosition(0);
+        preloadedServo.setPosition(0.5);
 
         //Mergem in fata la shipping hub
 
         af3.setElevator(true, uptime, true);
 
-        am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, -64, (int) (saizecicm * 1.38), 300, 1150, getPower() * 0.45, af3);
+        if(uptime == 3.2)
+            distmulti = 1.41;
 
-        if(uptime==3)
-            sleep(200);
+        am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, -69, (int) (saizecicm * distmulti), 300, 1150, getPower() * 0.45, af3);
+
+        if(uptime==3.2)
+            sleep(300);
 
         //Lasam cubul preloaded
-        liftServoR.setPower(0);
-        liftServoL.setPower(0);
-
-        totemServo.setPosition(0.5);
+        lift.setPower(-1);
+        sleep(100);
+        lift.setPower(0);
+        preloadedServo.setPosition(-0.2);
         sleep(500);
-        totemServo.setPosition(-0.5);
+        preloadedServo.setPosition(0.4);
+        sleep(200);
 
         //Dam inapoi
 
-        if(uptime==3)
+        if(uptime==3.2)
             af3.setElevator(true, uptime-1, false);
         else
             af3.setElevator(true, uptime, false);
 
         //am2.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.6), 300, 2400, getPower(), af3, 0, 650);
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.65), 300, 3700, getPower(), af3, 0, 585, 1100, 800);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.65), 300, 3700, getPower(), af3, 0, 575, 1100, 800, false);
 
 
         af3.setElevator(false, 0, true);
-        liftServoL.setPower(0);
-        liftServoR.setPower(0);
+        lift.setPower(0);
 
         //Luam cub
 
@@ -221,8 +225,8 @@ public class AutoV6 extends LinearOpMode {
         am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.5), 1500, getPower(), af3, 3,-73.23829463,true);
+        af3.setOutputmotor(true, 1, true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.5), 1500, getPower(), af3, 2,-73.23829463,true, false);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -231,13 +235,13 @@ public class AutoV6 extends LinearOpMode {
         //Punem cubul sus
 
         outputmotor.setPower(-0.5);
-        sleep(500);
+        sleep(700);
         outputmotor.setPower(0);
         sleep(100);
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.2), 300, 2300, getPower(), af3, 0, 585,1000,1500);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.2), 300, 2300, getPower(), af3, 0, 525,1000,1500, false);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);
@@ -248,8 +252,8 @@ public class AutoV6 extends LinearOpMode {
         am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.53), 1500, getPower(), af3, 3,-74.73829463,true);
+        af3.setOutputmotor(true, 1, true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.53), 1500, getPower(), af3, 2,-74.73829463,true, false);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -258,13 +262,13 @@ public class AutoV6 extends LinearOpMode {
         //intakeL.setPower(0);
 
         outputmotor.setPower(-0.5);
-        sleep(500);
+        sleep(700);
         outputmotor.setPower(0);
         sleep(100);
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.4), 300, 2300, getPower(), af3, 0, 560,1000,1700);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.4), 300, 2300, getPower(), af3, 0, 510,1000,1700, false);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);
@@ -275,8 +279,8 @@ public class AutoV6 extends LinearOpMode {
         am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.48), 1500, getPower(), af3, 3,-73.73829463,true);
+        af3.setOutputmotor(true, 1, true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.48), 1500, getPower(), af3, 2,-73.73829463,true, false);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -285,13 +289,13 @@ public class AutoV6 extends LinearOpMode {
         //Punem cubul sus
 
         outputmotor.setPower(-0.5);
-        sleep(500);
+        sleep(700);
         outputmotor.setPower(0);
         sleep(100);
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.35), 300, 2950, getPower(), af3, 0, 530,1000,1700);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.35), 300, 2950, getPower(), af3, 0, 480,1000,1700, false);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);
@@ -302,8 +306,8 @@ public class AutoV6 extends LinearOpMode {
         am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.85, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.55), 1500, getPower(), af3, 3,-73.23829463,true);
+        af3.setOutputmotor(true, 1, true);
+        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.55), 1500, getPower(), af3, 2,-73.23829463,true, false);
         sleep(100);
         af3.setIntake(false);
         //intakeR.setPower(0);
@@ -312,13 +316,13 @@ public class AutoV6 extends LinearOpMode {
         //Punem cubul sus
 
         outputmotor.setPower(-0.5);
-        sleep(500);
+        sleep(700);
         outputmotor.setPower(0);
         sleep(100);
 
         af3.setOutputmotor(true, 2.5, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.05), 300, 2300, getPower(), af3, 0, 545,1000,1500);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.05), 300, 2300, getPower(), af3, 0, 485,1000,1500, false);
 
         af3.setOutputmotor(false, 0, false);
         sleep(200);

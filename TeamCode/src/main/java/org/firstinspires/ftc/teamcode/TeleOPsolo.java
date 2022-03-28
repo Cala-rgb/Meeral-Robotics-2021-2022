@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -27,10 +28,8 @@ public class TeleOPsolo extends OpMode {
     private DcMotor fr = null;
     private DcMotor bl = null;
     private DcMotor br = null;
-    private CRServo duckServo = null;
-    private CRServo liftServoR = null;
-    private CRServo liftServoL = null;
-    private Servo totemServo = null;
+    private CRServo duckServo1 = null, duckServo2 = null;
+    private CRServo lift = null;
     private Servo preloadedServo = null;
 
     private DcMotor intakemotor1 = null;
@@ -47,14 +46,20 @@ public class TeleOPsolo extends OpMode {
     private TeleOpAutoV1 toa;
     private TeleOpFuncV1 tof;
 
+    private Servo pivRul = null;
+    private CRServo cleste = null;
+    private CRServo desRul = null;
+    private Servo rBrat = null;
+
+    private LED ledverde;
+
     BNO055IMU imu;
 
     private  void getEngines()
     {
-        duckServo = hardwareMap.get(CRServo.class, "duckServo");
-        liftServoL = hardwareMap.get(CRServo.class, "lift2");
-        liftServoR = hardwareMap.get(CRServo.class, "lift1");
-        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        duckServo1 = hardwareMap.get(CRServo.class, "duckServo1");
+        duckServo1 = hardwareMap.get(CRServo.class, "duckServo2");
+        lift = hardwareMap.get(CRServo.class, "lift");
         preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         fl  = hardwareMap.get(DcMotor.class, "fl");
@@ -70,6 +75,13 @@ public class TeleOPsolo extends OpMode {
         vs = hardwareMap.voltageSensor.iterator().next();
         under = hardwareMap.get(RevColorSensorV3.class, "under");
         under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
+
+        pivRul = hardwareMap.get(Servo.class, "pivRul");
+        cleste = hardwareMap.get(CRServo.class, "cleste");
+        desRul = hardwareMap.get(CRServo.class, "desRul");
+        rBrat = hardwareMap.get(Servo.class, "rBrat");
+
+        ledverde = hardwareMap.get(LED.class, "ledverde");
     }
 
     private void setDirections()
@@ -129,11 +141,11 @@ public class TeleOPsolo extends OpMode {
 
         mv = new Movement(fl,fr,bl,br,outputmotor,imu,vs,under,this);
 
-        iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,liftServoR, liftServoL, totemServo, duckServo, color, this);
+        //iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,lift, duckServo1, duckServo2, color, this, ledverde, pivRul, cleste, desRul, rBrat);
 
         toa = new TeleOpAutoV1(this, imu, fr, fl, br, bl, vs);
 
-        tof = new TeleOpFuncV1(this, intakemotor1, intakemotor2,outputmotor, color, under, duckServo, liftServoR, liftServoL);
+        tof = new TeleOpFuncV1(this, intakemotor1, intakemotor2,outputmotor, color, under, duckServo1, lift);
 
         bumpersteeringval = 0.25;
 
@@ -192,7 +204,7 @@ public class TeleOPsolo extends OpMode {
         if(gamepad1.back) {
             autoMove();
         }
-        iao.verifyAll(rightbump,leftbump, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad1.left_stick_y, runtime.milliseconds());
+        //iao.verifyAll(rightbump,leftbump, gamepad1.dpad_up, gamepad1.dpad_down, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.start, gamepad1.options, gamepad1.left_stick_y, gamepad1.left_stick_button, runtime.milliseconds());
     }
 
     @Override

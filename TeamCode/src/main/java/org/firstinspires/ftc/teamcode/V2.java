@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -27,11 +28,11 @@ public class V2 extends OpMode {
     private DcMotor fr = null;
     private DcMotor bl = null;
     private DcMotor br = null;
-    private CRServo duckServo = null;
-    private CRServo liftServoR = null;
-    private CRServo liftServoL = null;
-    private Servo totemServo = null;
+    private CRServo duckServo1 = null, duckServo2 = null;
+    private CRServo lift = null;
     private Servo preloadedServo = null;
+    private CRServo cleste = null;
+    private Servo rBrat = null;
 
     private DcMotor intakemotor1 = null;
     private DcMotor intakemotor2 = null;
@@ -41,6 +42,7 @@ public class V2 extends OpMode {
     private double pow,bumpersteeringval,duckSpeed= -0.2,lasttimeb=0.0,lasttimex=0.0,cangle;
     private RevColorSensorV3 color= null, under = null;
     private VoltageSensor vs;
+    private LED ledverde;
 
     BNO055IMU imu;
 
@@ -51,10 +53,9 @@ public class V2 extends OpMode {
 
     private  void getEngines()
     {
-        duckServo = hardwareMap.get(CRServo.class, "duckServo");
-        liftServoL = hardwareMap.get(CRServo.class, "lift2");
-        liftServoR = hardwareMap.get(CRServo.class, "lift1");
-        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        duckServo1 = hardwareMap.get(CRServo.class, "duckServo1");
+        duckServo2 = hardwareMap.get(CRServo.class, "duckServo2");
+        lift = hardwareMap.get(CRServo.class, "lift");
         preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         fl  = hardwareMap.get(DcMotor.class, "fl");
@@ -68,6 +69,11 @@ public class V2 extends OpMode {
         color = hardwareMap.get(RevColorSensorV3.class, "color");
         vs = hardwareMap.voltageSensor.iterator().next();
         under = hardwareMap.get(RevColorSensorV3.class, "under");
+
+        cleste = hardwareMap.get(CRServo.class, "cleste");
+        rBrat = hardwareMap.get(Servo.class, "rBrat");
+
+        ledverde = hardwareMap.get(LED.class, "ledverde");
     }
 
     private void setDirections()
@@ -133,17 +139,19 @@ public class V2 extends OpMode {
 
         mv = new Movement(fl,fr,bl,br,outputmotor,imu,vs,under,this);
 
-        iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,liftServoR, liftServoL, totemServo, duckServo, color, this);
+        iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor, lift, duckServo1, duckServo2, color, this, ledverde, cleste, rBrat);
 
         toa = new TeleOpAutoV1(this, imu, fr, fl, br, bl, vs);
 
-        tof = new TeleOpFuncV1(this, intakemotor1, intakemotor2,outputmotor, color, under, duckServo, liftServoR, liftServoL);
+        tof = new TeleOpFuncV1(this, intakemotor1, intakemotor2,outputmotor, color, under, duckServo1, lift);
 
         bumpersteeringval = 0.25;
 
         pow=0.5;
 
         telemetry.addData("Status", "Initialized");
+
+        rBrat.setPosition(0.15);
     }
 
     @Override
@@ -162,6 +170,9 @@ public class V2 extends OpMode {
         telemetry.addData("colorb", color.blue());
         telemetry.addData("dist", color.getDistance(DistanceUnit.CM));
         telemetry.update();*/
+        telemetry.addData("brat", rBrat.getPosition());
+        telemetry.addData("color", color.getDistance(DistanceUnit.CM));
+        telemetry.update();
         if(gamepad1.a)
             pow =1;
         else if (gamepad1.y)
@@ -185,7 +196,7 @@ public class V2 extends OpMode {
         if(gamepad1.right_bumper) {
             mv.break_func();
         }
-        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_right, gamepad2.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_left, gamepad1.start, gamepad1.share, gamepad2.left_stick_y, gamepad2.start, gamepad2.right_stick_y, gamepad2.right_stick_x, gamepad2.right_bumper, gamepad2.left_bumper,runtime.milliseconds());
 
     }
 

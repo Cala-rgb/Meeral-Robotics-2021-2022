@@ -182,7 +182,7 @@ public class TeleOpAutoV1 {
     }
 
     public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, TeleOpFuncV1 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
-        double targetAngle = getAngle()-10;
+        double targetAngle = getAngle()-10 ;
 
         double lasttime = lom.getRuntime();
 

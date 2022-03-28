@@ -1,7 +1,9 @@
+/*
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -21,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp
+@Disabled
 public class V1 extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor fl = null;
@@ -41,6 +45,8 @@ public class V1 extends OpMode {
     private double pow,bumpersteeringval,duckSpeed= -0.2,lasttimeb=0.0;
     private RevColorSensorV3 color= null, under = null;
     private VoltageSensor vs;
+
+    private LED ledverde;
 
     BNO055IMU imu;
 
@@ -66,6 +72,8 @@ public class V1 extends OpMode {
         color = hardwareMap.get(RevColorSensorV3.class, "color");
         vs = hardwareMap.voltageSensor.iterator().next();
         under = hardwareMap.get(RevColorSensorV3.class, "under");
+
+        ledverde = hardwareMap.get(LED.class, "ledverde");
     }
 
     private void setDirections()
@@ -132,7 +140,7 @@ public class V1 extends OpMode {
 
         mv = new Movement(fl,fr,bl,br,outputmotor,imu,vs,under,this);
 
-        iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,liftServoR, liftServoL, totemServo, duckServo, color, this);
+        iao = new IntakeAndOutput(intakemotor1, intakemotor2, outputmotor,liftServoR, liftServoL, totemServo, duckServo, color, this, ledverde);
 
         toa = new TeleOpAutoV1(this, imu, fr, fl, br, bl, vs);
 
@@ -173,10 +181,11 @@ public class V1 extends OpMode {
         if(gamepad1.right_bumper) {
             mv.break_func();
         }
-        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_right, gamepad2.dpad_left, gamepad1.start, gamepad2.left_stick_y, runtime.milliseconds());
+        iao.verifyAll(gamepad2.right_trigger, gamepad2.left_trigger, gamepad2.dpad_up, gamepad2.dpad_down, gamepad2.dpad_right, gamepad2.dpad_left, gamepad1.start, gamepad2.left_stick_y, gamepad2.start, runtime.milliseconds());
     }
 
     @Override
     public void stop() {
     }
 }
+*/

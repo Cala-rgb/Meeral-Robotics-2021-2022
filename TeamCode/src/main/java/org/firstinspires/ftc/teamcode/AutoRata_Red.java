@@ -57,14 +57,14 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Autonom version 5_1", group="Autonom finale")
-public class AutoV5_1 extends LinearOpMode {
+@Autonomous(name = "Autonom rata RED", group="Autonom competitie")
+public class AutoRata_Red extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL, outputmotor;
     private AutoMovement3 am3;
     private BNO055IMU imu;
-    private CRServo duckServo, liftServoR, liftServoL;
+    private CRServo duckServo1, duckServo2, lift;
     private Servo preloadedServo, totemServo;
     private OpenCvWebcam webcam;
     private RevColorSensorV3 color, under, under2;
@@ -74,16 +74,15 @@ public class AutoV5_1 extends LinearOpMode {
     private AutoFunctionsV3 af3;
     int nouazecigrade = 610;
     int saizecicm = 1000;
-    double uptime;
+    double uptime,distmulti=1.42;
     double startVoltage,minVoltage=20.0;
     VoltageSensor vs;
 
     private void getHardware() {
 
-        duckServo = hardwareMap.get(CRServo.class, "duckServo");
-        liftServoL = hardwareMap.get(CRServo.class, "lift2");
-        liftServoR = hardwareMap.get(CRServo.class, "lift1");
-        totemServo = hardwareMap.get(Servo.class, "totemservo");
+        duckServo1 = hardwareMap.get(CRServo.class, "duckServo1");
+        duckServo2 = hardwareMap.get(CRServo.class, "duckServo2");
+        lift= hardwareMap.get(CRServo.class, "lift");
         preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         frontLeft  = hardwareMap.get(DcMotor.class, "fl");
@@ -99,7 +98,8 @@ public class AutoV5_1 extends LinearOpMode {
         under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
 
         vs = hardwareMap.voltageSensor.iterator().next();
-        duckServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        duckServo1.setDirection(DcMotorSimple.Direction.REVERSE);
+        duckServo2.setDirection(DcMotorSimple.Direction.REVERSE);
         //?
     }
 
@@ -135,7 +135,6 @@ public class AutoV5_1 extends LinearOpMode {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = false;
-        FtcDashboard dashboard = FtcDashboard.getInstance();
         //telemetry = dashboard.getTelemetry();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -156,10 +155,16 @@ public class AutoV5_1 extends LinearOpMode {
             idle();
         }
 
+        telemetry.addData("ok","ok");
+        telemetry.update();
+        //sleep(3000);
+
         getHardware();
-        sc = new ServoController(liftServoR, liftServoL, outputmotor);
+
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+
         am3 = new AutoMovement3(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
-        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2,duckServo, liftServoR, liftServoL);
+        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2, lift);
 
         if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
             uptime = 0;
@@ -168,7 +173,7 @@ public class AutoV5_1 extends LinearOpMode {
             uptime = 0.9;
         }
         else {
-            uptime = 3;
+            uptime = 3.2;
         }
 
         telemetry.addData("Mode", "calibrated");
@@ -178,149 +183,53 @@ public class AutoV5_1 extends LinearOpMode {
 
         //Setam servourile la pozitilor lor
 
-        preloadedServo.setPosition(0.65);
-        totemServo.setPosition(0);
+        preloadedServo.setPosition(0.5);
 
         //Mergem in fata la shipping hub
 
         af3.setElevator(true, uptime, true);
 
-        am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, -67, (int) (saizecicm * 1.4), 300, 1150, getPower() * 0.45, af3);
+        if(uptime == 3.2)
+            distmulti = 1.425;
 
-        if(uptime==3)
-            sleep(700);
+        am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, 64, (int) (saizecicm * distmulti), 300, 1150, getPower() * 0.45, af3);
+
+        if(uptime==3.2)
+            sleep(300);
 
         //Lasam cubul preloaded
-        liftServoR.setPower(0);
-        liftServoL.setPower(0);
-
-        totemServo.setPosition(0.5);
+        lift.setPower(0);
+        preloadedServo.setPosition(-0.2);
         sleep(500);
-        totemServo.setPosition(-0.5);
+        preloadedServo.setPosition(0.5);
+        sleep(200);
 
-        //Dam inapoi
-
-        if(uptime==3)
-            af3.setElevator(true, uptime-1, false);
+        if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.RIGHT)
+            uptime-=2;
         else
-            af3.setElevator(true, uptime, false);
+            uptime=0;
 
-        //am2.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.6), 300, 2400, getPower(), af3, 0, 650);
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.6), 300, 3700, getPower(), af3, 0, 595, 1100, 800);
+        af3.setElevator(true,uptime,false);
 
+        am3.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, 2180, 300, 1500, getPower()*0.2, af3, 0, 445);
 
-        af3.setElevator(false, 0, true);
-        liftServoL.setPower(0);
-        liftServoR.setPower(0);
+        af3.setElevator(false,0,true);
 
-        //Luam cub
+        am3.strafeWithGyro(0.6, AutoMovement3.Directions.LEFT,getPower()*0.2,af3);
 
-        af3.setIntake(true);
-        af3.setTask(AutoFunctionsV3.Tasks.TAKE_FREIGHT);
-        am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
-        sleep(100);
-        af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.7, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.59), 1500, getPower(), af3, 3,-64.73829463,true);
-        sleep(100);
-        af3.setIntake(false);
-        //intakeR.setPower(0);
-        //intakeL.setPower(0);
+        duckServo2.setPower(0.35);
+        sleep(3000);
+        duckServo2.setPower(0);
 
-        //Punem cubul sus
+        am3.strafeWithGyro(1.25, AutoMovement3.Directions.RIGHT,getPower(),af3);
 
-        outputmotor.setPower(-0.75);
-        sleep(500);
-        outputmotor.setPower(0);
-        sleep(100);
+        am3.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, 250, 100, 100, getPower()*0.2, af3, 0, 0);
 
-        af3.setOutputmotor(true, 2.5, false);
+        /*am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD,(int) (saizecicm*1.4), 300, 1700, getPower(), af3, 125,0, 1000, 500, false);
 
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.94), 300, 2300, getPower(), af3, 0, 605,1000,1000);
+        sleep(13000);
 
-        af3.setOutputmotor(false, 0, false);
-        sleep(200);
-
-        //Luam cub 2
-        af3.setIntake(true);
-        af3.setTask(AutoFunctionsV3.Tasks.TAKE_FREIGHT);
-        am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
-        sleep(100);
-        af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.7, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.6), 1500, getPower(), af3, 3,-66.23829463,true);
-        sleep(100);
-        af3.setIntake(false);
-        //intakeR.setPower(0);
-
-        //Punem cubul sus
-        //intakeL.setPower(0);
-
-        outputmotor.setPower(-0.75);
-        sleep(500);
-        outputmotor.setPower(0);
-        sleep(100);
-
-        af3.setOutputmotor(true, 2.5, false);
-
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.28), 300, 2300, getPower(), af3, 0, 570,1000,1100);
-
-        af3.setOutputmotor(false, 0, false);
-        sleep(200);
-
-        //Luam cub 3
-        af3.setIntake(true);
-        af3.setTask(AutoFunctionsV3.Tasks.TAKE_FREIGHT);
-        am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
-        sleep(100);
-        af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.7, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.57), 1500, getPower(), af3, 3,-65.73829463,true);
-        sleep(100);
-        af3.setIntake(false);
-        //intakeR.setPower(0);
-        //intakeL.setPower(0);
-
-        //Punem cubul sus
-
-        outputmotor.setPower(-0.75);
-        sleep(500);
-        outputmotor.setPower(0);
-        sleep(100);
-
-        af3.setOutputmotor(true, 2.5, false);
-
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.25), 300, 2950, getPower(), af3, 0, 540,1000,1100);
-
-        af3.setOutputmotor(false, 0, false);
-        sleep(200);
-
-        //Luam cub4
-        af3.setIntake(true);
-        af3.setTask(AutoFunctionsV3.Tasks.TAKE_FREIGHT);
-        am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
-        sleep(100);
-        af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 0.7, true);
-        am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.62), 1500, getPower(), af3, 3,-66.73829463,true);
-        sleep(100);
-        af3.setIntake(false);
-        //intakeR.setPower(0);
-        //intakeL.setPower(0);
-
-        //Punem cubul sus
-
-        outputmotor.setPower(-0.75);
-        sleep(500);
-        outputmotor.setPower(0);
-        sleep(100);
-
-        af3.setOutputmotor(true, 2.5, false);
-
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*3.05), 300, 2300, getPower(), af3, 0, 555,1000,1100);
-
-        af3.setOutputmotor(false, 0, false);
-        sleep(200);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD,(int) (saizecicm*3), 300, 1700, getPower(), af3, 180,0, 200, 2000, false);*/
 
     }
 }

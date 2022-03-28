@@ -20,7 +20,7 @@ public class AutoMovement3 {
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
-    int startTurnAfter = 250;
+    int startTurnAfter = 365;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
@@ -174,7 +174,7 @@ public class AutoMovement3 {
         setPowerToMotors(0);
     }
 
-    public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks) {
+    public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks, boolean strafe_direction) {
         double targetAngle = getAngle();
 
         resetEncoders();
@@ -203,7 +203,10 @@ public class AutoMovement3 {
 
             if(getEncoderAverage() >= startStrafeTicks && getEncoderAverage()<startStrafeTicks+strafeDurationTicks)
             {
-                setPowerToMotors(myPow - gain * deviation - 0.8, myPow + gain * deviation , myPow - gain * deviation, myPow + gain * deviation - 0.8);
+                if (strafe_direction)
+                    setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation - 0.2, myPow - gain * deviation - 0.2, myPow + gain * deviation);
+                else
+                    setPowerToMotors(myPow - gain * deviation - 0.2, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation-0.2 );
             }
             else {
                 setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation);
@@ -357,7 +360,7 @@ public class AutoMovement3 {
         setPowerToMotors(0);
     }
 
-    public void driveToAndTurnAndStrafeWithGyroWhen(Directions direction, int encoderTarget, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double  startangle, double turnangle, boolean ok) {
+    public void driveToAndTurnAndStrafeWithGyroWhen(Directions direction, int encoderTarget, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double  startangle, double turnangle, boolean ok, boolean strafe_direction) {
         double targetAngle =startangle;
 
         resetEncoders();
@@ -380,10 +383,12 @@ public class AutoMovement3 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.75;
+            myPow = maxPower*0.6921;
 
-            setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.1, myPow - gain * deviation-0.1, myPow + gain * deviation);
-
+            if (strafe_direction)
+                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.1, myPow - gain * deviation-0.1, myPow + gain * deviation);
+            else
+                setPowerToMotors(myPow - gain * deviation - 0.1, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation - 0.1);
         }
 
         if(AutoFunctionsV3.Tasks.NONE != af3.getCurrentTask())
@@ -405,7 +410,10 @@ public class AutoMovement3 {
 
                 myPow = maxPower*1;
 
-                setPowerToMotors(myPow + gain * deviation-0.5, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.5);
+                if (!strafe_direction)
+                    setPowerToMotors(myPow + gain * deviation-0.22, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.2);
+                else
+                    setPowerToMotors(myPow + gain * deviation, myPow - gain * deviation - 0.2, myPow + gain * deviation - 0.2, myPow - gain * deviation);
             }
             resetEncoders();
             setDirection(direction);
@@ -423,8 +431,10 @@ public class AutoMovement3 {
 
                 myPow = maxPower*0.75;
 
-                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.3, myPow - gain * deviation-0.3, myPow + gain * deviation);
-
+                if (!strafe_direction)
+                    setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.15, myPow - gain * deviation-0.15, myPow + gain * deviation);
+                else
+                    setPowerToMotors(myPow - gain * deviation - 0.15, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation - 0.15);
             }
         }
 
@@ -532,7 +542,7 @@ public class AutoMovement3 {
         setPowerToMotors(0);
     }
 
-    public void strafeWithGyro(double patrate, Directions direction, double pow) {
+    public void strafeWithGyro(double patrate, Directions direction, double pow, AutoFunctionsV3 af3) {
         double targetAngle = 0;
         resetEncoders();
         setDirection(direction);
@@ -552,7 +562,9 @@ public class AutoMovement3 {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         double gain = .01, accelerateGain = 0.05, myPow = minPower, brakeGain = 0.05;
         setPowerToMotors(myPow);
+        af3.prepareForQueries(pow);
         while (lom.opModeIsActive() && frontRight.isBusy()) {
+            af3.executeQueries(pow);
             if (myPow < pow) {
                 myPow += accelerateGain;
             }

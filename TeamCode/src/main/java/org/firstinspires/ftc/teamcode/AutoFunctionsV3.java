@@ -15,12 +15,13 @@ public class AutoFunctionsV3 {
 
     private DcMotor intakeR, intakeL, outputmotor;
     private RevColorSensorV3 color, under, under2;
-    private CRServo duckServo, liftServoR, liftServoL;
+    private CRServo lift;
     private LinearOpMode linearOpMode;
 
     private boolean elevatorEnabled = false, outputmotorEnabled = false, intakeEnabled = false;
     private double elevatorStop = 0.0, outputmotorStop = 0.0, intakeStop = 0.0;
     private boolean elevatorForward = true, outputmotorForward = true, intakeForward = true;
+    private double distance;
 
     private double initialTime = 0.0;
 
@@ -33,17 +34,15 @@ public class AutoFunctionsV3 {
     //Tasks - regleaza miscarea
     //Queries -  se executa in timpul miscarii
 
-    public AutoFunctionsV3(LinearOpMode lom, DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, RevColorSensorV3 color, RevColorSensorV3 under, RevColorSensorV3 under2,CRServo duckServo, CRServo liftServoR, CRServo liftServoL)
+    public AutoFunctionsV3(LinearOpMode lom, DcMotor intakeR, DcMotor intakeL, DcMotor outputmotor, RevColorSensorV3 color, RevColorSensorV3 under, RevColorSensorV3 under2, CRServo lift)
     {
         this.intakeR = intakeR;
         this.intakeL = intakeL;
         this.color = color;
         this.under = under;
         this.under2 = under2;
-        this.duckServo = duckServo;
         this.outputmotor = outputmotor;
-        this.liftServoR = liftServoR;
-        this.liftServoL = liftServoL;
+        this.lift = lift;
         this.linearOpMode = lom;
     }
 
@@ -51,18 +50,15 @@ public class AutoFunctionsV3 {
         initialTime = linearOpMode.getRuntime();
         if (elevatorEnabled) {
             if (elevatorForward) {
-                liftServoR.setPower(-1);
-                liftServoL.setPower(1);
+                lift.setPower(-1);
             }
             else {
-                liftServoR.setPower(1);
-                liftServoL.setPower(-1);
+                lift.setPower(1);
             }
         }
         else
         {
-            liftServoR.setPower(0);
-            liftServoL.setPower(0);
+            lift.setPower(0);
         }
         if (outputmotorEnabled) {
             if (outputmotorForward) {
@@ -95,8 +91,7 @@ public class AutoFunctionsV3 {
 
     public void executeQueries(double power) {
         if (elevatorEnabled && linearOpMode.getRuntime() - initialTime >= elevatorStop) {
-            liftServoR.setPower(0);
-            liftServoL.setPower(0);
+            lift.setPower(0);
         }
         if (outputmotorEnabled && linearOpMode.getRuntime() - initialTime >= outputmotorStop) {
             outputmotor.setPower(-0.08);
@@ -144,20 +139,11 @@ public class AutoFunctionsV3 {
         alphatotal = totalalpha;
     }
 
-    //TODO: fix sensor
     public void updateTask() {
-        double red = under.red();
-        double blue = under.blue();
-        double green = under.green();
-        int alpha = under.alpha();
-        double red2 = under2.red();
-        double blue2 = under2.blue();
-        double green2 = under2.green();
-        int alpha2 = under2.alpha();
-        linearOpMode.telemetry.addData("Rgb", red+blue+blue);
-        linearOpMode.telemetry.addData("alpha", alpha);
+        distance = (under.getDistance(DistanceUnit.CM) + under2.getDistance(DistanceUnit.CM)) / 2.0;
+        linearOpMode.telemetry.addData("dist",distance);
         linearOpMode.telemetry.update();
-        if (currentTask == Tasks.LEAVE_STORAGE && ((alpha > alphatotal || red + green + blue > colorsumtotal) || (alpha2 > alphatotal || red2 + green2 + blue2 > colorsumtotal))) {
+        if (currentTask == Tasks.LEAVE_STORAGE && (distance < 2)) {
             currentTask = Tasks.NONE;
         }
         else if (currentTask == Tasks.TAKE_FREIGHT) {
