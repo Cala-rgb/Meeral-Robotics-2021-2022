@@ -20,7 +20,8 @@ public class AutoMovement3 {
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
-    int startTurnAfter = 425;
+    int startTurnAfter;
+    boolean blue = true;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
@@ -33,6 +34,10 @@ public class AutoMovement3 {
         this.backLeft = backLeft;
         this.vs = vs;
         this.minPower = 0.3 * (11 / vs.getVoltage());
+    }
+
+    void setTurn(int ticks) {
+        startTurnAfter = ticks;
     }
 
     private double getCurrentPower(int currentTick, int encoderStopAccelerate, int encoderStartBrake, int encoderTarget, double maxPower) {
@@ -176,6 +181,9 @@ public class AutoMovement3 {
 
     public void driveToAndTurnAndStrafeWithGyro(Directions direction, int encoderTarget, int encoderStopAccelerate, int encoderStartBrake, double maxPower, AutoFunctionsV3 af3, double turnangle, int startTurnTicks, int startStrafeTicks, int strafeDurationTicks, boolean strafe_direction) {
         double targetAngle = getAngle();
+
+        if(blue)
+            targetAngle -= 10;
 
         resetEncoders();
         setDirection(direction);
@@ -383,10 +391,10 @@ public class AutoMovement3 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.5;
+            myPow = maxPower*0.45;
 
-            if (strafe_direction)
-                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.1, myPow - gain * deviation-0.1, myPow + gain * deviation);
+            if (!strafe_direction)
+                setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation - 0.1, myPow - gain * deviation - 0.1, myPow + gain * deviation);
             else
                 setPowerToMotors(myPow - gain * deviation - 0.1, myPow + gain * deviation, myPow - gain * deviation, myPow + gain * deviation - 0.1);
         }
@@ -411,7 +419,7 @@ public class AutoMovement3 {
                 myPow = maxPower*1;
 
                 if (!strafe_direction)
-                    setPowerToMotors(myPow + gain * deviation-0.22, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.2);
+                    setPowerToMotors(myPow + gain * deviation-0.2, myPow - gain * deviation, myPow + gain * deviation, myPow - gain * deviation-0.2);
                 else
                     setPowerToMotors(myPow + gain * deviation, myPow - gain * deviation - 0.2, myPow + gain * deviation - 0.2, myPow - gain * deviation);
             }

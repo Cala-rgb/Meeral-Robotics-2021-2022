@@ -193,27 +193,27 @@ public class AutoRata_Red extends LinearOpMode {
         duckServo2.setPower(0);
         am3.strafeWithGyro(1.8, AutoMovement3.Directions.RIGHT,getPower()*0.3,af3);
         af3.setElevator(true, uptime, true);
-        am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 1205, 400, 905, getPower() * 0.45, af3);
+        am3.driveToAndTurnWithGyro(AutoMovement3.Directions.BACKWARD, 1205, 400, 905, getPower() * 0.45, af3,0,0);
         sleep(200);
         preloadedServo.setPosition(0.85);
         sleep(800);
         preloadedServo.setPosition(0.35);
         sleep(200);
 
-        boolean parcareStorageUnit = true;
+        boolean parcareStorageUnit = false;
         if (parcareStorageUnit) {
             af3.setElevator(true, uptime, false);
-            am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
-            am3.strafeWithGyro(0.4, AutoMovement3.Directions.LEFT,getPower()*0.3,af3);
+            am3.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3,0,0);
+            am3.strafeWithGyro(0.6, AutoMovement3.Directions.LEFT,getPower()*0.45,af3);
         }
         else {
             af3.setElevator(true, uptime, false);
             am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
             am3.strafeWithGyro(1.5, AutoMovement3.Directions.LEFT,getPower()*0.75,af3);
             am3.driveToAndTurnWithGyro(AutoMovement3.Directions.BACKWARD, 750,300,700, getPower(), af3,0,0);
-            am3.strafeWithGyro(0.6, AutoMovement3.Directions.LEFT,getPower()*0.5,af3);
+            am3.strafeWithGyro(0.75, AutoMovement3.Directions.LEFT,getPower()*0.5,af3);
             sleep(12000);
-            am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 3100, 300, 2900, getPower(), af3);
+            am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.BACKWARD, 3100, 300, 2900, getPower(), af3,0,0,200,1500,false);
         }
     }
 }

@@ -138,7 +138,7 @@ public class IntakeAndOutput {
     }
 
     void treatOutput(double joy2) {
-            outputmotor.setPower(joy2 * -0.6 +0.05);
+            outputmotor.setPower(joy2 * -0.8 +0.05);
     }
 
     void ratusca(boolean start, boolean options) {
@@ -196,7 +196,7 @@ public class IntakeAndOutput {
             } else if(up) {
                 bratpos -= 0.005;
             }
-            if(rBrat.getPosition()>0.835)
+            if(bratpos>=0.836)
                 bratpos=0.8381;
             rBrat.setPosition(bratpos);
        // }
