@@ -57,15 +57,15 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@Autonomous(name = "Autonom rata RED", group="Autonom competitie")
-public class AutoRata_Red extends LinearOpMode {
+@Autonomous(name = "Cod2", group="Cod")
+public class Cod2 extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontRight, frontLeft, backRight, backLeft, intakeR, intakeL, outputmotor;
     private AutoMovement3 am3;
     private BNO055IMU imu;
-    private CRServo duckServo1, duckServo2, lift;
-    private Servo preloadedServo, totemServo;
+    private CRServo  lift;
+    private Servo preloadedServo;
     private OpenCvWebcam webcam;
     private RevColorSensorV3 color, under, under2;
     private TeamElementPipeline pipeline;
@@ -74,15 +74,14 @@ public class AutoRata_Red extends LinearOpMode {
     private AutoFunctionsV3 af3;
     int nouazecigrade = 610;
     int saizecicm = 1000;
-    double uptime,distmulti=1.42;
+    double uptime,distmulti=1.4;
     double startVoltage,minVoltage=20.0;
     VoltageSensor vs;
+    FtcDashboard dashboard;
 
     private void getHardware() {
 
-        duckServo1 = hardwareMap.get(CRServo.class, "duckServo1");
-        duckServo2 = hardwareMap.get(CRServo.class, "duckServo2");
-        lift= hardwareMap.get(CRServo.class, "lift");
+        lift = hardwareMap.get(CRServo.class, "lift");
         preloadedServo = hardwareMap.get(Servo.class, "preloadedservo");
 
         frontLeft  = hardwareMap.get(DcMotor.class, "fl");
@@ -98,8 +97,10 @@ public class AutoRata_Red extends LinearOpMode {
         under2 = hardwareMap.get(RevColorSensorV3.class, "under2");
 
         vs = hardwareMap.voltageSensor.iterator().next();
-        duckServo1.setDirection(DcMotorSimple.Direction.REVERSE);
-        duckServo2.setDirection(DcMotorSimple.Direction.REVERSE);
+        //duckServo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intakeR.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeL.setDirection(DcMotorSimple.Direction.FORWARD);
         //?
     }
 
@@ -112,108 +113,30 @@ public class AutoRata_Red extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new TeamElementPipeline();
-        webcam.setPipeline(pipeline);
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(640,480, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled = false;
-        //telemetry = dashboard.getTelemetry();
+        dashboard = FtcDashboard.getInstance();
+        telemetry = dashboard.getTelemetry();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-
-        imu.initialize(parameters);
 
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
 
-        // make sure the imu gyro is calibrated before continuing.
-        while ((!isStarted() && !isStopRequested()) || !imu.isGyroCalibrated())
-        {
-            snapshotAnalysis = pipeline.getAnalysis();
-            telemetry.addData("Realtime analysis", pipeline.getAnalysis());
-            telemetry.update();
-            sleep(50);
-            idle();
-        }
-
-        telemetry.addData("ok","ok");
-        telemetry.update();
-        //sleep(3000);
-
         getHardware();
 
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        am3 = new AutoMovement3(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
-        af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2, lift);
+        waitForStart();
 
-        //snapshotAnalysis = TeamElementPipeline.TeamElementPosition.RIGHT;
+        double pos = -1.0;
 
-        if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
-            uptime = 0;
-        }
-        else if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.CENTER){
-            uptime = 0.9;
-        }
-        else {
-            uptime = 3.2;
-        }
-
-        telemetry.addData("Mode", "calibrated");
-        telemetry.update();
         preloadedServo.setDirection(Servo.Direction.REVERSE);
-
         preloadedServo.setPosition(0.35);
-
-        runtime.reset();
-
-        am3.strafeWithGyro(0.3, AutoMovement3.Directions.RIGHT,getPower()*0.2,af3);
-        am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1000, 100, 650, getPower() * 0.6, af3);
-        duckServo2.setPower(0.5);
-        sleep(3000);
-        duckServo2.setPower(0);
-        am3.strafeWithGyro(1.8, AutoMovement3.Directions.RIGHT,getPower()*0.3,af3);
-        af3.setElevator(true, uptime, true);
-        am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 1205, 400, 905, getPower() * 0.45, af3);
-        sleep(200);
+        sleep(5000);
         preloadedServo.setPosition(0.85);
-        sleep(800);
-        preloadedServo.setPosition(0.35);
-        sleep(200);
+        sleep(5000);
 
-        boolean parcareStorageUnit = false;
-        if (parcareStorageUnit) {
-            af3.setElevator(true, uptime, false);
-            am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
-            am3.strafeWithGyro(0.4, AutoMovement3.Directions.LEFT,getPower()*0.3,af3);
-        }
-        else {
-            af3.setElevator(true, uptime, false);
-            am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
-            am3.strafeWithGyro(1.5, AutoMovement3.Directions.LEFT,getPower()*0.75,af3);
-            am3.driveToAndTurnWithGyro(AutoMovement3.Directions.BACKWARD, 750,300,700, getPower(), af3,0,0);
-            am3.strafeWithGyro(0.6, AutoMovement3.Directions.LEFT,getPower()*0.5,af3);
-            sleep(12000);
-            am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 3100, 300, 2900, getPower(), af3);
-        }
     }
 }

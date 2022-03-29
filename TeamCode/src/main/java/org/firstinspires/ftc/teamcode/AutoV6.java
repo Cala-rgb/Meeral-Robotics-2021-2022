@@ -181,7 +181,9 @@ public class AutoV6 extends LinearOpMode {
 
         //Setam servourile la pozitilor lor
 
-        preloadedServo.setPosition(0.5);
+        preloadedServo.setDirection(Servo.Direction.REVERSE);
+
+        preloadedServo.setPosition(0.35);
 
         //Mergem in fata la shipping hub
 
@@ -199,9 +201,9 @@ public class AutoV6 extends LinearOpMode {
         lift.setPower(-1);
         sleep(100);
         lift.setPower(0);
-        preloadedServo.setPosition(-0.2);
+        preloadedServo.setPosition(0.85);
         sleep(500);
-        preloadedServo.setPosition(0.4);
+        preloadedServo.setPosition(0.35);
         sleep(200);
 
         //Dam inapoi
@@ -212,7 +214,7 @@ public class AutoV6 extends LinearOpMode {
             af3.setElevator(true, uptime, false);
 
         //am2.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.6), 300, 2400, getPower(), af3, 0, 650);
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.65), 300, 3700, getPower(), af3, 0, 575, 1100, 800, false);
+        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD, (int) (saizecicm*2.45), 300, 3700, getPower(), af3, 0, 575, 1100, 800, false);
 
 
         af3.setElevator(false, 0, true);
@@ -234,8 +236,8 @@ public class AutoV6 extends LinearOpMode {
 
         //Punem cubul sus
 
-        outputmotor.setPower(-0.5);
-        sleep(700);
+        outputmotor.setPower(-0.75);
+        sleep(550);
         outputmotor.setPower(0);
         sleep(100);
 
@@ -261,8 +263,8 @@ public class AutoV6 extends LinearOpMode {
         //Punem cubul sus
         //intakeL.setPower(0);
 
-        outputmotor.setPower(-0.5);
-        sleep(700);
+        outputmotor.setPower(-0.75);
+        sleep(550);
         outputmotor.setPower(0);
         sleep(100);
 
@@ -288,8 +290,8 @@ public class AutoV6 extends LinearOpMode {
 
         //Punem cubul sus
 
-        outputmotor.setPower(-0.5);
-        sleep(700);
+        outputmotor.setPower(-0.75);
+        sleep(550);
         outputmotor.setPower(0);
         sleep(100);
 
@@ -315,8 +317,8 @@ public class AutoV6 extends LinearOpMode {
 
         //Punem cubul sus
 
-        outputmotor.setPower(-0.5);
-        sleep(700);
+        outputmotor.setPower(-0.75);
+        sleep(550);
         outputmotor.setPower(0);
         sleep(100);
 

@@ -136,9 +136,11 @@ public class Cod extends LinearOpMode {
             backLeft.setPower(0.4);
             backRight.setPower(0.4);
             double entre = getRuntime();
-            while (opModeIsActive() && getRuntime()  - entre < 1.21) {
+            while (opModeIsActive() && getRuntime()  - entre < 0.6) {
                 telemetry.addData("Dist1", under.getDistance(DistanceUnit.CM));
                 telemetry.addData("Dist2", under2.getDistance(DistanceUnit.CM));
+                telemetry.addData("Light1", under.getLightDetected());
+                telemetry.addData("Light2", under2.getLightDetected());
                 telemetry.update();
             }
             frontLeft.setPower(-0.4);
@@ -146,9 +148,11 @@ public class Cod extends LinearOpMode {
             backLeft.setPower(-0.4);
             backRight.setPower(-0.4);
             entre = this.getRuntime();
-            while (opModeIsActive() && getRuntime() - entre < 1.21) {
+            while (opModeIsActive() && getRuntime() - entre < 0.6) {
                 telemetry.addData("Dist1", under.getDistance(DistanceUnit.CM));
                 telemetry.addData("Dist2", under2.getDistance(DistanceUnit.CM));
+                telemetry.addData("Light1", under.getLightDetected());
+                telemetry.addData("Light2", under2.getLightDetected());
                 telemetry.update();
             }
             frontLeft.setPower(0);

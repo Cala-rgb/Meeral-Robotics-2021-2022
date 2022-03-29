@@ -20,7 +20,7 @@ public class AutoMovement3 {
     private double lastAngle = 0.0;
     int valpatrat = 1000;
     double minPower;
-    int startTurnAfter = 365;
+    int startTurnAfter = 425;
     VoltageSensor vs;
 
     public enum Directions {FORWARD, BACKWARD, LEFT, RIGHT, ROTATE_RIGHT, ROTATE_LEFT};
@@ -383,7 +383,7 @@ public class AutoMovement3 {
             if (deviation > 180) deviation -= 360;
             else if (deviation < -180) deviation += 360;
 
-            myPow = maxPower*0.6921;
+            myPow = maxPower*0.5;
 
             if (strafe_direction)
                 setPowerToMotors(myPow - gain * deviation, myPow + gain * deviation-0.1, myPow - gain * deviation-0.1, myPow + gain * deviation);
