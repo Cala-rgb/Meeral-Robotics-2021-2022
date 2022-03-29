@@ -143,7 +143,7 @@ public class AutoFunctionsV3 {
         distance = (under.getDistance(DistanceUnit.CM) + under2.getDistance(DistanceUnit.CM)) / 2.0;
         linearOpMode.telemetry.addData("dist",distance);
         linearOpMode.telemetry.update();
-        if (currentTask == Tasks.LEAVE_STORAGE && (distance < 2.35)) {
+        if (currentTask == Tasks.LEAVE_STORAGE && (distance < 1.75)) {
             currentTask = Tasks.NONE;
         }
         else if (currentTask == Tasks.TAKE_FREIGHT) {

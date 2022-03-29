@@ -399,7 +399,7 @@ public class AutoMovement3 {
             af3.setColorAndAlpha(3050.0, 1800.0);
             lom.sleep(300);
 
-            while(lom.opModeIsActive() && getEncoderAverage()<=1500)
+            while(lom.opModeIsActive() && getEncoderAverage()<=1350)
             {
 
                 //af3.executeQueries(maxPower);

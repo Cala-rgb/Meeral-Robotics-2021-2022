@@ -227,7 +227,7 @@ public class AutoV6 extends LinearOpMode {
         am3.driveWithGyroUntil(AutoMovement3.Directions.FORWARD,getPower() * 0.25, af3);
         sleep(100);
         af3.setTask(AutoFunctionsV3.Tasks.LEAVE_STORAGE);
-        af3.setOutputmotor(true, 1, true);
+        af3.setOutputmotor(true, 1.15, true);
         am3.driveToAndTurnAndStrafeWithGyroWhen(AutoMovement3.Directions.BACKWARD, (int) (saizecicm * 1.5), 1500, getPower(), af3, 2,-73.23829463,true, false);
         sleep(100);
         af3.setIntake(false);

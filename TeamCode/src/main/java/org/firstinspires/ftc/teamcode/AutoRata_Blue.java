@@ -166,6 +166,8 @@ public class AutoRata_Blue extends LinearOpMode {
         am3 = new AutoMovement3(this, imu, frontRight, frontLeft, backRight, backLeft, vs);
         af3 = new AutoFunctionsV3(this, intakeR, intakeL, outputmotor, color, under, under2, lift);
 
+        //snapshotAnalysis = TeamElementPipeline.TeamElementPosition.RIGHT;
+
         if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.LEFT) {
             uptime = 0;
         }
@@ -178,56 +180,40 @@ public class AutoRata_Blue extends LinearOpMode {
 
         telemetry.addData("Mode", "calibrated");
         telemetry.update();
+        preloadedServo.setDirection(Servo.Direction.REVERSE);
+
+        preloadedServo.setPosition(0.35);
 
         runtime.reset();
 
-        //Setam servourile la pozitilor lor
-
-        preloadedServo.setPosition(0.5);
-
-        //Mergem in fata la shipping hub
-
-        af3.setElevator(true, uptime, true);
-
-        if(uptime == 3.2)
-            distmulti = 1.425;
-
-        am3.turnWithGyro(AutoMovement3.Directions.BACKWARD, -64, (int) (saizecicm * distmulti), 300, 1150, getPower() * 0.45, af3);
-
-        if(uptime==3.2)
-            sleep(300);
-
-        //Lasam cubul preloaded
-        lift.setPower(0);
-        preloadedServo.setPosition(-0.2);
-        sleep(500);
-        preloadedServo.setPosition(0.5);
-        sleep(200);
-
-        if(snapshotAnalysis == TeamElementPipeline.TeamElementPosition.RIGHT)
-            uptime-=1.5;
-
-        af3.setElevator(true,uptime,false);
-
-        am3.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, 2180, 300, 1500, getPower()*0.2, af3, 0, 445);
-
-        af3.setElevator(false,0,true);
-
-        am3.strafeWithGyro(0.6, AutoMovement3.Directions.RIGHT,getPower()*0.2,af3);
-
-        duckServo2.setPower(0.35);
+        am3.strafeWithGyro(0.3, AutoMovement3.Directions.LEFT,getPower()*0.2,af3);
+        am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1000, 100, 650, getPower() * 0.6, af3);
+        duckServo2.setPower(0.5);
         sleep(3000);
         duckServo2.setPower(0);
+        am3.strafeWithGyro(1.8, AutoMovement3.Directions.LEFT,getPower()*0.3,af3);
+        af3.setElevator(true, uptime, true);
+        am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 1205, 400, 905, getPower() * 0.45, af3);
+        sleep(200);
+        preloadedServo.setPosition(0.85);
+        sleep(800);
+        preloadedServo.setPosition(0.35);
+        sleep(200);
 
-        am3.strafeWithGyro(1.25, AutoMovement3.Directions.LEFT,getPower(),af3);
-
-        //am3.driveToAndTurnWithGyro(AutoMovement3.Directions.FORWARD, 250, 100, 100, getPower()*0.2, af3, 0, 0);
-
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD,(int) (saizecicm*1.35), 300, 1700, getPower()*0.2, af3, -125,0, 1000, 500, true);
-
-        sleep(13000);
-
-        am3.driveToAndTurnAndStrafeWithGyro(AutoMovement3.Directions.FORWARD,(int) (saizecicm*3), 300, 1700, getPower(), af3, -160,0, 200, 2500, true);
-
+        boolean parcareStorageUnit = true;
+        if (parcareStorageUnit) {
+            af3.setElevator(true, uptime, false);
+            am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
+            am3.strafeWithGyro(0.4, AutoMovement3.Directions.RIGHT,getPower()*0.3,af3);
+        }
+        else {
+            af3.setElevator(true, uptime, false);
+            am3.driveToWithGyro(AutoMovement3.Directions.FORWARD, 1425, 400, 905, getPower() * 0.45, af3);
+            am3.strafeWithGyro(1.5, AutoMovement3.Directions.RIGHT,getPower()*0.75,af3);
+            am3.driveToAndTurnWithGyro(AutoMovement3.Directions.BACKWARD, 750,300,700, getPower(), af3,0,0);
+            am3.strafeWithGyro(0.6, AutoMovement3.Directions.RIGHT,getPower()*0.5,af3);
+            sleep(12000);
+            am3.driveToWithGyro(AutoMovement3.Directions.BACKWARD, 3100, 300, 2900, getPower(), af3);
+        }
     }
 }

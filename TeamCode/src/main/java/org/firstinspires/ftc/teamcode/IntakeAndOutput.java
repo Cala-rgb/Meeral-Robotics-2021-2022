@@ -196,7 +196,7 @@ public class IntakeAndOutput {
             } else if(up) {
                 bratpos -= 0.005;
             }
-            if(rBrat.getPosition()>0.8321)
+            if(rBrat.getPosition()>0.835)
                 bratpos=0.8381;
             rBrat.setPosition(bratpos);
        // }
